@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Configuration
 @EnableWebFluxSecurity
 public class GatewaySecurityConfig {
@@ -23,14 +26,12 @@ public class GatewaySecurityConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("user-account-service", r -> r.path("/api/auth/**", "/api/users/**", "/api/accounts/**")
-                                .uri("lb://user-account-service") // this depends on the discover Eureka service
-//                                .uri("http://localhost:8081") //this allows you to communicate with the intending service by by-passing the eureka discovery service
-                )
+                        .filters(f->f.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+                        .uri("lb://user-account-service"))
 
                 .route("transaction-service", r -> r.path("/api/transactions/**")
-                                .uri("lb://transaction-service")
-//                                .uri("http://localhost:8082")
-                )
+                        .filters(f->f.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+                                .uri("lb://transaction-service"))
                 .build();
 
     }

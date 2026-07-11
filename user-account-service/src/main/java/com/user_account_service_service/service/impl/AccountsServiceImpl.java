@@ -50,7 +50,7 @@ public class AccountsServiceImpl implements AccountsService {
     }
 
     @Override
-    public ApiResponse<AccountDTO> getAccountNumber(String accountNumber) {
+    public ApiResponse<AccountDTO> getAccountNumber(String accountNumber ,String correlationId) {
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(()-> new NotFoundException("Account Not Found"));

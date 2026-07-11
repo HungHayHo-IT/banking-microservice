@@ -68,3 +68,8 @@ info:
   app:
     name: "user-account-service"
     version: "1.0.0"
+
+logger:
+  level:
+    com:
+      user-account-service: DEBUG

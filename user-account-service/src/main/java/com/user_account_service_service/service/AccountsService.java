@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface AccountsService {
     ApiResponse<AccountDTO> getMyAccount();
 
-    ApiResponse<AccountDTO> getAccountNumber(String accountNumber);
+    ApiResponse<AccountDTO> getAccountNumber(String accountNumber,String correlationId);
 
     ApiResponse<AccountDTO> changeAccountStatus(String accountNumber, AccountStatus status);
 

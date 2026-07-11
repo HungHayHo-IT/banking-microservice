@@ -4,16 +4,18 @@ import com.user_account_service_service.dto.AccountDTO;
 import com.user_account_service_service.dto.ApiResponse;
 import com.user_account_service_service.service.AccountsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/accounts")
 @RequiredArgsConstructor
 public class AccountController {
+
+    private final Logger logger = LoggerFactory.getLogger(AccountController.class);
 
     private final AccountsService accountsService;
 
@@ -24,8 +26,10 @@ public class AccountController {
 
     @GetMapping("/{accountNumber}")
     public ResponseEntity<ApiResponse<AccountDTO>> getAccountByNumber(
+            @RequestHeader("banknow-correlation-id") String correlationId,
             @PathVariable String accountNumber
     ) {
-        return ResponseEntity.ok(accountsService.getAccountNumber(accountNumber));
+        logger.debug("banknow-correlation-id: " , correlationId);
+        return ResponseEntity.ok(accountsService.getAccountNumber(accountNumber,correlationId));
     }
 }

@@ -55,3 +55,8 @@ info:
   app:
     name: "transaction-service"
     version: "1.0.0"
+
+logger:
+  level:
+    com:
+      transaction-service: DEBUG

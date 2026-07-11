@@ -4,6 +4,14 @@ server:
 spring:
   name:
     application: "gateway-service"
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+              lowerCaseServiceId: true
   security:
     user:
       name: disabled
@@ -32,6 +40,8 @@ management:
       exposure:
         include: "*"
   endpoint:
+    gateway:
+      enabled: true
     shutdown:
       enabled: true
   info:
@@ -46,4 +56,9 @@ info:
   app:
     name: "gateway-service"
     version: "1.0.0"
+
+logger:
+  level:
+    com:
+      gateway-service: DEBUG
 

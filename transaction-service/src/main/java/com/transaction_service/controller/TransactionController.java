@@ -7,6 +7,8 @@ import com.transaction_service.enums.TransactionDirection;
 import com.transaction_service.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,17 +22,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/transactions")
 public class TransactionController {
-
+    private final Logger logger = LoggerFactory.getLogger(TransactionController.class);
     private final TransactionService transactionService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<ApiResponse<TransactionDTO>> transfer(@Valid @RequestBody TransactionRequest request) {
-        return ResponseEntity.ok(transactionService.transfer(request));
+    public ResponseEntity<ApiResponse<TransactionDTO>> transfer(@Valid @RequestBody TransactionRequest request ,@RequestHeader("banknow-correlation-id") String correlationId) {
+        logger.debug("bankapp-correlation-id found: {}" , correlationId);
+        return ResponseEntity.ok(transactionService.transfer(request,correlationId));
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<ApiResponse<TransactionDTO>> withdraw(@Valid @RequestBody TransactionRequest request) {
-        return ResponseEntity.ok(transactionService.withdraw(request));
+    public ResponseEntity<ApiResponse<TransactionDTO>> withdraw(@Valid @RequestBody TransactionRequest request ,@RequestHeader("banknow-correlation-id") String correlationId) {
+        logger.debug("bankapp-correlation-id found: {}" , correlationId);
+        return ResponseEntity.ok(transactionService.withdraw(request,correlationId));
     }
 
     @GetMapping("/history")

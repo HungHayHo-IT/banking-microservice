@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TransactionService {
-    ApiResponse<TransactionDTO> deposit(TransactionRequest request);
+    ApiResponse<TransactionDTO> deposit(TransactionRequest request, String correlationid);
 
-    ApiResponse<TransactionDTO> transfer(TransactionRequest request);
+    ApiResponse<TransactionDTO> transfer(TransactionRequest request,String correlationid);
 
-    ApiResponse<TransactionDTO> withdraw(TransactionRequest request);
+    ApiResponse<TransactionDTO> withdraw(TransactionRequest request,String correlationid);
 
     ApiResponse<TransactionDTO> getTransactionByReference(String reference);
 

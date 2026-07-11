@@ -35,8 +35,8 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionEventPublisher transactionEventPublisher;
 
     @Override
-    public ApiResponse<TransactionDTO> deposit(TransactionRequest request) {
-        fetchAndValidateAccount(request.getToAccountNumber());
+    public ApiResponse<TransactionDTO> deposit(TransactionRequest request , String correlationid) {
+        fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
 
         Transaction deposit = Transaction.builder()
                 .reference("DEP" + UUID.randomUUID().toString().substring(0, 8))
@@ -75,11 +75,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> transfer(TransactionRequest request) {
+    public ApiResponse<TransactionDTO> transfer(TransactionRequest request,String correlationid) {
         if (request.getFromAccountNumber() == null || request.getFromAccountNumber().isEmpty()) {
             throw new BadRequestException("From Account is Needed");
         }
-        AccountDTO sourceAccount = fetchAndValidateAccount(request.getFromAccountNumber());
+        AccountDTO sourceAccount = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
 
         String loggedInUserEmail = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -106,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BadRequestException("You cannot transfer to the same account number(Yourself)");
         }
 
-        fetchAndValidateAccount(request.getToAccountNumber());
+        fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
 
         Transaction transferTnx = Transaction.builder()
                 .reference("TRF" + UUID.randomUUID().toString().substring(0, 8))
@@ -154,8 +154,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> withdraw(TransactionRequest request) {
-        AccountDTO account = fetchAndValidateAccount(request.getFromAccountNumber());
+    public ApiResponse<TransactionDTO> withdraw(TransactionRequest request, String correlationid) {
+        AccountDTO account = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
 
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new BadRequestException("Inactive Account");
@@ -267,9 +267,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     }
 
-    private AccountDTO fetchAndValidateAccount(String accountNumber) {
 
-        ApiResponse<AccountDTO> response = accountFeignClient.getAccountByNumber(accountNumber);
+    private AccountDTO fetchAndValidateAccount(String accountNumber,String correlationId) {
+
+        ApiResponse<AccountDTO> response = accountFeignClient.getAccountByNumber(accountNumber,correlationId);
 
         if (response == null || response.data() == null) {
             throw new NotFoundException("Account " + accountNumber + "not found");

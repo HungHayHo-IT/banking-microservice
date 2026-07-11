@@ -4,7 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9ca4bb81-4513-4209-bf34-727085801c44" name="Changes" comment="" />
+    <list default="true" id="9ca4bb81-4513-4209-bf34-727085801c44" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/FilterUtility.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/RequestTraceFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/ResponseTraceFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/feign/AccountFeignClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/feign/AccountFeignClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/TransactionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/impl/TransactionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/impl/TransactionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/AccountsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/AccountsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/impl/AccountsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/impl/AccountsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,6 +42,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -43,6 +62,7 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "D:/PROJECT/microservice/transaction-service/src/main/java/com/transaction_service/exception",
     "settings.editor.selected.configurable": "project.propCompiler"
   }
@@ -132,8 +152,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.GatewayServiceApplication" />
-        <item itemvalue="Application.TransactionServiceApplication" />
         <item itemvalue="Application.NotificationServiceApplication" />
+        <item itemvalue="Application.TransactionServiceApplication" />
         <item itemvalue="Application.UserAccountServiceServiceApplication" />
         <item itemvalue="Application.DiscoveryServiceApplication" />
       </list>
