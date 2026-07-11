@@ -22,6 +22,10 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
 eureka:
   instance:
@@ -34,6 +38,14 @@ eureka:
 
 jwt:
   secret: K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 2
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
 
 management:
   endpoints:
@@ -56,7 +68,7 @@ info:
     name: "transaction-service"
     version: "1.0.0"
 
-logger:
+logging:
   level:
     com:
-      transaction-service: DEBUG
+      transaction_service: DEBUG

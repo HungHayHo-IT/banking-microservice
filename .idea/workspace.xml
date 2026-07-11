@@ -5,21 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ca4bb81-4513-4209-bf34-727085801c44" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/FilterUtility.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/RequestTraceFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/filter/ResponseTraceFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/Controller/FallbackController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/feign/AccountFeignClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/feign/AccountFeignClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/TransactionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/impl/TransactionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/service/impl/TransactionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/AccountsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/AccountsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/impl/AccountsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/service/impl/AccountsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +55,9 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "D:/PROJECT/microservice/transaction-service/src/main/java/com/transaction_service/exception",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "project.propCompiler"
   }
 }]]></component>
