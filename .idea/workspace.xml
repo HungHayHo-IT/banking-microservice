@@ -5,12 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ca4bb81-4513-4209-bf34-727085801c44" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/Controller/FallbackController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/discovery-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/discovery-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid17432.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/replay_pid17432.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,8 +55,9 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/PROJECT/microservice/transaction-service/src/main/java/com/transaction_service/exception",
+    "last_opened_file_path": "D:/PROJECT/microservice/docker-compose",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
@@ -63,11 +66,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\PROJECT\microservice\docker-compose" />
       <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\exception" />
       <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\enums" />
       <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\entity" />
       <recent name="D:\PROJECT\microservice\notification-service\src\main\java\com\notification_service\kafka\enums" />
-      <recent name="D:\PROJECT\microservice" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.notification_service.kafka.dto" />
@@ -147,8 +150,8 @@
       <list>
         <item itemvalue="Application.GatewayServiceApplication" />
         <item itemvalue="Application.NotificationServiceApplication" />
-        <item itemvalue="Application.TransactionServiceApplication" />
         <item itemvalue="Application.UserAccountServiceServiceApplication" />
+        <item itemvalue="Application.TransactionServiceApplication" />
         <item itemvalue="Application.DiscoveryServiceApplication" />
       </list>
     </recent_temporary>

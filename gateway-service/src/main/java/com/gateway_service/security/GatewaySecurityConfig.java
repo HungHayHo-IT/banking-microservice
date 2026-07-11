@@ -52,6 +52,7 @@ public class GatewaySecurityConfig {
                                         .setMethods(HttpMethod.GET)
                                         .setBackoff(Duration.ofMillis(100),Duration.ofMillis(1000),2,true)
                                 )
+                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter()).setKeyResolver(userKeyResolver()))
                                 .circuitBreaker(config -> config.setName("CircuitBreaker").setFallbackUri("forward:/contactSupport"))
                         )
                                 .uri("lb://transaction-service"))
