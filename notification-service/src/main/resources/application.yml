@@ -1,0 +1,67 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: "notification-service"
+  datasource:
+    url: jdbc:mysql://localhost:3308/notification-db
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: com.user_account_service_service.kafka.dto.UserRegistrationEvent:com.notification_service.kafka.dto.UserRegistrationEvent , com.user_account_service_service.kafka.dto.BalanceUpdateEvent:com.notification_service.kafka.dto.BalanceUpdateEvent
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nguyenphuocnhahungl97@gmail.com
+    password: ioix tmsx fuii whhi
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+endpoints:
+  shutdown:
+    enabled: true
+
+info:
+  app:
+    name: "notification-service"
+    version: "1.0.0"
