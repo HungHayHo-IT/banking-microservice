@@ -2,8 +2,6 @@ server:
   port: 8080
 
 spring:
-  config:
-    import: optional:file:.env[.properties]
   name:
     application: "gateway-service"
   cloud:
@@ -30,7 +28,7 @@ logging:
     org.springframework.cloud.gateway: TRACE
 
 jwt:
-  secret: ${JWT_SECRETE}
+  secret: K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b
 
 eureka:
   instance:

@@ -1,14 +1,12 @@
 server:
   port: 8082
 spring:
-  config:
-    import: optional:file:.env[.properties]
   application:
     name: "transaction-service"
   datasource:
-    url: ${DB_URL}
-    username: ${DB_PASSWORD}
-    password: ${DB_USERNAME}
+    url: jdbc:mysql://localhost:3307/transaction-db
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true
@@ -39,7 +37,7 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
 
 jwt:
-  secret: ${JWT_SECRETE}
+  secret: K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b
 
 resilience4j.circuitbreaker:
   configs:

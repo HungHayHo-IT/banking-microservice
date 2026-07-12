@@ -1,16 +1,28 @@
-FROM maven:3.9.12-amazoncorretto-25 AS build
+# Bước 1: Build ứng dụng sử dụng image Maven chính thức
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 WORKDIR /app
 
+# Copy file cấu hình pom.xml vào container
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 
+# Tải trước dependencies (giúp tăng tốc độ build cho các lần sau)
+RUN mvn dependency:go-offline
+
+# Copy toàn bộ mã nguồn vào container
 COPY src ./src
+
+# Build dự án bằng lệnh mvn chuẩn (bỏ qua chạy test để tiết kiệm thời gian)
 RUN mvn clean package -DskipTests
 
-FROM amazoncorretto:25
+# Bước 2: Chạy ứng dụng với môi trường JRE siêu nhẹ
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app//target/*.jar app.jar
 
-EXPOSE 8761
+# Copy file .jar được build từ bước builder sang
+COPY --from=builder /app/target/*.jar app.jar
 
-ENTRYPOINT ["java" , "-jar","app.jar"]
+# Expose cổng 8083 (dựa theo cấu hình application.yml của notification service)
+EXPOSE 8083
+
+# Lệnh khởi chạy ứng dụng
+ENTRYPOINT ["java", "-jar", "app.jar"]

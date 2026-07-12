@@ -1,14 +1,12 @@
 server:
   port: 8083
 spring:
-  config:
-    import: optional:file:.env[.properties]
   application:
     name: "notification-service"
   datasource:
-    url: ${DB_URL}
-    username: ${DB_PASSWORD}
-    password: ${DB_USERNAME}
+    url: jdbc:mysql://localhost:3308/notification-db
+    username: root
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true
@@ -30,8 +28,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: nguyenphuocnhahungl97@gmail.com
+    password: ioix tmsx fuii whhi
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
