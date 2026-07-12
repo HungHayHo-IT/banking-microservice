@@ -5,14 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ca4bb81-4513-4209-bf34-727085801c44" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway-service/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transaction-service/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/user-account-service/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/discovery-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/discovery-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gateway-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/java/com/gateway_service/security/GatewaySecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hs_err_pid17432.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/replay_pid17432.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gateway-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notification-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notification-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/AdminTransactionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/controller/TransactionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/AccountDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/AccountDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/ApiResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/ApiResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/ErrorResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/ErrorResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/TransactionDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/TransactionDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/TransactionRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/dto/TransactionRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/java/com/transaction_service/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/transaction-service/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user-account-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/UserAccountServiceServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/UserAccountServiceServiceApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AdminAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AdminAccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AdminUserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AdminUserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/AccountDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/AccountDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/ApiResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/ApiResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/AuthResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/AuthResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/ErrorResponseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/ErrorResponseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserStatisticsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserStatisticsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserWithAccountDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/dto/UserWithAccountDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/java/com/user_account_service_service/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/user-account-service/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +84,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/PROJECT/microservice/docker-compose",
+    "last_opened_file_path": "D:/PROJECT/microservice/banking-microservice/gateway-service",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
@@ -66,11 +93,14 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\PROJECT\microservice\banking-microservice\gateway-service" />
+      <recent name="D:\PROJECT\microservice\banking-microservice\notification-service" />
+      <recent name="D:\PROJECT\microservice\banking-microservice\transaction-service" />
       <recent name="D:\PROJECT\microservice\docker-compose" />
       <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\exception" />
-      <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\enums" />
-      <recent name="D:\PROJECT\microservice\transaction-service\src\main\java\com\transaction_service\entity" />
-      <recent name="D:\PROJECT\microservice\notification-service\src\main\java\com\notification_service\kafka\enums" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\PROJECT\microservice\banking-microservice\user-account-service" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.notification_service.kafka.dto" />
@@ -80,7 +110,7 @@
       <recent name="com.notification_service.kafka.enums.transaction" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.GatewayServiceApplication">
+  <component name="RunManager" selected="Application.TransactionServiceApplication">
     <configuration name="DiscoveryServiceApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.discovery_service.DiscoveryServiceApplication" />
       <module name="discovery-service" />
@@ -148,11 +178,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.TransactionServiceApplication" />
+        <item itemvalue="Application.UserAccountServiceServiceApplication" />
+        <item itemvalue="Application.DiscoveryServiceApplication" />
         <item itemvalue="Application.GatewayServiceApplication" />
         <item itemvalue="Application.NotificationServiceApplication" />
-        <item itemvalue="Application.UserAccountServiceServiceApplication" />
-        <item itemvalue="Application.TransactionServiceApplication" />
-        <item itemvalue="Application.DiscoveryServiceApplication" />
       </list>
     </recent_temporary>
   </component>

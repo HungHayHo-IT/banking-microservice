@@ -1,12 +1,14 @@
 server:
   port: 8081
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: "user-account-service"
   datasource:
-    url: jdbc:mysql://localhost:3306/users-account-db
-    username: root
-    password: root
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true
@@ -33,8 +35,8 @@ spring:
 
 #jwt config
 jwt:
-  secret: K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b
-  expiration: 86400000
+  secret: ${JWT_SECRETE}
+  expiration: ${JWT_EXPIRATION}
 
 eureka:
   instance:

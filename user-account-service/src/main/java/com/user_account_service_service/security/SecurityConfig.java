@@ -24,7 +24,12 @@ public class SecurityConfig {
     public  SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity){
         httpSecurity.csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(
-                        auth-> auth.requestMatchers("/api/auth/**","/actuator/**").permitAll()
+                        auth-> auth.requestMatchers("/api/auth/**"
+                                        ,"/actuator/**"
+                                        ,"/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(
