@@ -1,0 +1,184 @@
+# user-accounts-mysql
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-account-mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-account-mysql
+  labels:
+    app: user-account-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-account-mysql
+  template:
+    metadata:
+      labels:
+        app: user-account-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: banking-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "users-account-db"
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: user-account-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-account-mysql
+spec:
+  selector:
+    app: user-account-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+---
+#transaction-mysql
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: transaction-mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-mysql
+  labels:
+    app: transaction-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-mysql
+  template:
+    metadata:
+      labels:
+        app: transaction-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: banking-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "transaction-db"
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: transaction-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-mysql
+spec:
+  selector:
+    app: transaction-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+
+---
+#notification-mysql
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notification-mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-mysql
+  labels:
+    app: notification-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-mysql
+  template:
+    metadata:
+      labels:
+        app: notification-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: banking-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "notification-db"
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: notification-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-mysql
+spec:
+  selector:
+    app: notification-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: banking-configmap
+data:
+
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://discovery-service:8761/eureka/"
+
+
+  DISCOVERY_SERVICE_APPLICATION_NAME: "discovery-service"
+  GATEWAY_SERVICE_APPLICATION_NAME: "gateway-service"
+  USER_ACCOUNT_SERVICE_APPLICATION_NAME: "user-account-service"
+  TRANSACTION_SERVICE_APPLICATION_NAME: "transaction-service"
+  NOTIFICATION_SERVICE_APPLICATION_NAME: "notification-service"
+
+
+  SPRING_DATA_REDIS_HOST: "redis"
+  SPRING_DATA_REDIS_PORT: "6379"
+
+
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
+
+  USER_ACCOUNT_DB_URL: "jdbc:mysql://user-account-mysql:3306/users-account-db"
+  TRANSACTION_DB_URL: "jdbc:mysql://transaction-mysql:3306/transaction-db"
+  NOTIFICATION_DB_URL: "jdbc:mysql://notification-mysql:3306/notification-db"
+
+
+  SPRING_MAIL_HOST: "smtp.gmail.com"
+  SPRING_MAIL_PORT: "587"
