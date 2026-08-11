@@ -9,7 +9,7 @@ services:
     container_name: mysql-user-account
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       MYSQL_DATABASE: users-account-db
     ports:
       - "3306:3306"
@@ -28,7 +28,7 @@ services:
     container_name: mysql-transaction
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       MYSQL_DATABASE: transaction-db
     ports:
       - "3307:3306"
@@ -47,14 +47,14 @@ services:
     container_name: mysql-notification
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       MYSQL_DATABASE: notification-db
     ports:
       - "3308:3306"
     volumes:
       - mysql-notification-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}" ]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -137,12 +137,12 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-user-account:3306/users-account-db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      JWT_SECRET: ${JWT_SECRET:-K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
     ports:
       - "8081:8081"
     depends_on:
@@ -173,7 +173,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      JWT_SECRET: ${JWT_SECRET:-K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
     ports:
       - "8082:8082"
     depends_on:
@@ -202,12 +202,12 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notification:3306/notification-db
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-nguyenphuocnhahungl97@gmail.com}
-      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-ioix tmsx fuii whhi}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME is required}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
     ports:
       - "8083:8083"
     depends_on:
@@ -235,7 +235,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
-      JWT_SECRET: ${JWT_SECRET:-K8f3nQpZ9vX2wR7tY4mL6jH1sD5gB0cN3xU8qE2rT9yW6iO4pA1kF7hM5nV0zC8b}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
     ports:
       - "8080:8080"
     depends_on:

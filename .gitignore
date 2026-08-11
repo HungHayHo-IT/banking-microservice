@@ -1,0 +1,62 @@
+# ==============================
+# Secrets and local environment
+# ==============================
+.env
+**/.env
+.env.*
+docker-compose/.env
+!.env.example
+!docker-compose/.env
+
+.k8s-secrets.env
+*.pem
+*.key
+*.p12
+*.jks
+
+# Kubernetes secret values
+kubernetes/*secret*.yml
+kubernetes/*secret*.yaml
+!kubernetes/*secret*.example.yml
+!kubernetes/*secret*.example.yaml
+
+# ==============================
+# IntelliJ IDEA
+# ==============================
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ==============================
+# Maven / Java
+# ==============================
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# ==============================
+# Logs / JVM crash files
+# ==============================
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# ==============================
+# Operating systems
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# Editors
+# ==============================
+.vscode/
+*.swp
+*.swo
