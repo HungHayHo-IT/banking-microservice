@@ -184,8 +184,8 @@ flowchart TB
 git clone https://github.com/HungHayHo-IT/banking-microservice.git
 cd banking-microservice/docker-compose
 
-# Tạo file .env từ mẫu và điền giá trị thật (xem mục Biến môi trường)
-cp .env.example .env
+# Tạo file .env.example từ mẫu và điền giá trị thật (xem mục Biến môi trường)
+cp .env.example.example .env.example
 
 docker compose up -d --build
 ```

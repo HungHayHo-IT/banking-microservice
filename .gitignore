@@ -1,55 +1,80 @@
 # ==============================
 # Secrets and local environment
 # ==============================
+
+# Ignore environment files containing real values
 .env
 **/.env
 .env.*
-docker-compose/.env
-!.env.example
-!docker-compose/.env
+**/.env.*
 
+# Allow example environment files
+!.env.example
+!**/.env.example
+
+# Local Kubernetes secrets
 .k8s-secrets.env
+**/.k8s-secrets.env
+
+# Keys and certificates
 *.pem
 *.key
 *.p12
 *.jks
 
-# Kubernetes secret values
+# ==============================
+# Kubernetes Secret manifests
+# ==============================
+
+# Ignore real Secret manifests
 kubernetes/*secret*.yml
 kubernetes/*secret*.yaml
+
+# Allow example Secret manifests
 !kubernetes/*secret*.example.yml
 !kubernetes/*secret*.example.yaml
 
 # ==============================
 # IntelliJ IDEA
 # ==============================
+
 .idea/
 **/.idea/
 *.iml
 *.iws
 *.ipr
 out/
+**/out/
 
 # ==============================
 # Maven / Java
 # ==============================
+
+target/
 **/target/
 *.class
 *.jar
 *.war
 *.ear
 
+# Maven Wrapper JAR must remain tracked
+!**/.mvn/wrapper/maven-wrapper.jar
+
 # ==============================
-# Logs / JVM crash files
+# Logs and JVM crash files
 # ==============================
+
 *.log
+*.log.*
 logs/
+**/logs/
 hs_err_pid*
 replay_pid*
 
 # ==============================
 # Operating systems
 # ==============================
+
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -57,6 +82,8 @@ desktop.ini
 # ==============================
 # Editors
 # ==============================
+
 .vscode/
+**/.vscode/
 *.swp
 *.swo
