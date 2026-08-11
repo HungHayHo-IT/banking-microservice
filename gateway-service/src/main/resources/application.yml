@@ -2,8 +2,8 @@ server:
   port: 8080
 
 spring:
-  name:
-    application: "gateway-service"
+  application:
+    name: "gateway-service"
   cloud:
     gateway:
       server:
