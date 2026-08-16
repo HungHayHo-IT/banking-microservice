@@ -1,12 +1,10 @@
 package com.transaction_service.service.impl;
 
-import com.transaction_service.dto.AccountDTO;
-import com.transaction_service.dto.ApiResponse;
-import com.transaction_service.dto.TransactionDTO;
-import com.transaction_service.dto.TransactionRequest;
+import com.transaction_service.dto.*;
 import com.transaction_service.entity.Transaction;
 import com.transaction_service.enums.*;
 import com.transaction_service.exception.BadRequestException;
+import com.transaction_service.exception.ForbiddenException;
 import com.transaction_service.exception.NotFoundException;
 import com.transaction_service.feign.AccountFeignClient;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -35,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionEventPublisher transactionEventPublisher;
 
     @Override
-    public ApiResponse<TransactionDTO> deposit(TransactionRequest request , String correlationid) {
+    public ApiResponse<TransactionDTO> deposit(DepositRequest request, String correlationid) {
         fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
 
         Transaction deposit = Transaction.builder()
@@ -75,11 +74,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> transfer(TransactionRequest request,String correlationid) {
+    public ApiResponse<TransactionDTO> transfer(TransferRequest request, String correlationid) {
         if (request.getFromAccountNumber() == null || request.getFromAccountNumber().isEmpty()) {
             throw new BadRequestException("From Account is Needed");
         }
-        AccountDTO sourceAccount = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
+        AccountDTO sourceAccount =
+                fetchOwnedAccount(request.getFromAccountNumber(), correlationid);
 
         String loggedInUserEmail = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -154,8 +154,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> withdraw(TransactionRequest request, String correlationid) {
-        AccountDTO account = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
+    public ApiResponse<TransactionDTO> withdraw(WithdrawRequest request, String correlationid) {
+        AccountDTO account = fetchOwnedAccount(request.getFromAccountNumber(),correlationid);
 
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new BadRequestException("Inactive Account");
@@ -236,7 +236,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<List<TransactionDTO>> getTransactionHistory(String accountNumber, LocalDateTime start, LocalDateTime end) {
+    public ApiResponse<List<TransactionDTO>> getTransactionHistory(String accountNumber, LocalDateTime start, LocalDateTime end, String correlationId) {
+        fetchOwnedAccount(accountNumber, correlationId);
+
+
+        if (start.isAfter(end)) {
+            throw new BadRequestException(
+                    "Start date must not be after end date"
+            );
+        }
 
         List<Transaction> history = transactionRepository.findAllAccountNumberAndDateRange(accountNumber, start, end);
 
@@ -284,5 +292,31 @@ public class TransactionServiceImpl implements TransactionService {
 
         return account;
 
+    }
+
+    private AccountDTO fetchOwnedAccount(
+            String accountNumber,
+            String correlationId
+    ) {
+        AccountDTO account = fetchAndValidateAccount(
+                accountNumber,
+                correlationId
+        );
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String authenticatedEmail = authentication.getName();
+
+        if (!Objects.equals(
+                account.getOwnerEmail(),
+                authenticatedEmail
+        )) {
+            throw new ForbiddenException(
+                    "You are not the owner of account " + accountNumber
+            );
+        }
+
+        return account;
     }
 }

@@ -22,10 +22,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,36 +46,42 @@ public class AuthServiceImpl implements AuthService {
     private final AccountEventPublisher accountEventPublisher;
 
     @Override
-    public ApiResponse<AuthResponse> registerUser(RegistrationRequest registrationRequest) {
-        log.info("We are inside the register user service method");
-        if(userRepository.existsByEmail(registrationRequest.getEmail())){
-            throw new BadRequestException("Account already exist for this email");
+    @Transactional
+    public ApiResponse<AuthResponse> registerUser(
+            RegistrationRequest registrationRequest
+    ) {
+        String normalizedEmail = registrationRequest.getEmail()
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        if (userRepository.existsByEmail(normalizedEmail)) {
+            throw new BadRequestException("An account already exists for this email");
         }
 
-        Set<Role> roles = new HashSet<>();
+        Role customerRole = roleRepository.findByName("CUSTOMER")
+                .orElseThrow(() ->
+                        new NotFoundException("CUSTOMER role was not configured"));
 
-        String roleName = (registrationRequest.getRole() != null && !registrationRequest.getRole().isBlank())
-                ? registrationRequest.getRole().toUpperCase()
-                : "CUSTOMER";
-
-        Role databaseRole = roleRepository.findByName(roleName)
-                .orElseThrow(()-> new NotFoundException("Role with name" + roleName + " Not found"));
-
-        roles.add(databaseRole);
         User userToSave = User.builder()
-                .email(registrationRequest.getEmail())
-                .password(passwordEncoder.encode(registrationRequest.getPassword()))
-                .firstName(registrationRequest.getFirstName())
-                .lastName(registrationRequest.getLastName())
+                .email(normalizedEmail)
+                .password(passwordEncoder.encode(
+                        registrationRequest.getPassword()
+                ))
+                .firstName(registrationRequest.getFirstName().trim())
+                .lastName(
+                        registrationRequest.getLastName() == null
+                                ? null
+                                : registrationRequest.getLastName().trim()
+                )
                 .enabled(true)
-                .roles(roles)
+                .roles(Set.of(customerRole))
                 .build();
 
         User savedUser = userRepository.save(userToSave);
 
         String accountNumber = generateUniqueAccountNumber();
 
-        Account accountToSaveToDb = Account.builder()
+        Account account = Account.builder()
                 .accountNumber(accountNumber)
                 .balance(BigDecimal.ZERO)
                 .currency(Currency.VND)
@@ -81,7 +89,8 @@ public class AuthServiceImpl implements AuthService {
                 .accountStatus(AccountStatus.ACTIVE)
                 .user(savedUser)
                 .build();
-        accountRepository.save(accountToSaveToDb);
+
+        accountRepository.save(account);
 
         UserRegistrationEvent event = UserRegistrationEvent.builder()
                 .email(savedUser.getEmail())
@@ -90,14 +99,20 @@ public class AuthServiceImpl implements AuthService {
                 .accountNumber(accountNumber)
                 .bankName("BANK NOW")
                 .build();
+
         accountEventPublisher.publishedUserRegistrationEvent(event);
 
         UserDTO userDTO = modelMapper.map(savedUser, UserDTO.class);
 
-        AuthResponse authResponse = AuthResponse.builder()
+        AuthResponse response = AuthResponse.builder()
                 .user(userDTO)
                 .build();
-        return new ApiResponse<>(HttpStatus.CONTINUE.value(), "User account created successfully", authResponse);
+
+        return new ApiResponse<>(
+                HttpStatus.CREATED.value(),
+                "User account created successfully",
+                response
+        );
     }
 
     @Override

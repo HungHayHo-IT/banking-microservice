@@ -2,7 +2,6 @@ package com.transaction_service.controller;
 
 import com.transaction_service.dto.ApiResponse;
 import com.transaction_service.dto.TransactionDTO;
-import com.transaction_service.dto.TransactionRequest;
 import com.transaction_service.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

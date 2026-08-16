@@ -7,9 +7,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "user-account-service")
+@FeignClient(
+        name = "user-account-service",
+        configuration = FeignConfig.class
+)
 public interface AccountFeignClient {
 
-    @GetMapping(value = "/api/accounts/{accountNumber}",consumes = "application/json")
-    ApiResponse<AccountDTO> getAccountByNumber(@RequestHeader("banknow-correlation-id") String correlationId, @PathVariable("accountNumber") String accountNumber);
+    @GetMapping("/api/accounts/{accountNumber}")
+    ApiResponse<AccountDTO> getAccountByNumber(
+            @PathVariable("accountNumber") String accountNumber,
+            @RequestHeader("banknow-correlation-id") String correlationId
+    );
+
+    @GetMapping("/api/accounts/me")
+    ApiResponse<AccountDTO> getMyAccount(
+            @RequestHeader("banknow-correlation-id") String correlationId
+    );
 }
