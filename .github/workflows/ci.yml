@@ -1,0 +1,87 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build ${{ matrix.service }}
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        service:
+          - discovery-service
+          - gateway-service
+          - user-account-service
+          - transaction-service
+          - notification-service
+
+    services:
+      mysql:
+        image: mysql:8.0
+
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ci_db
+
+        ports:
+          - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_URL: "jdbc:mysql://127.0.0.1:3306/ci_db?useSSL=false&allowPublicKeyRetrieval=true"
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+      JWT_SECRET: "ci-test-only-jwt-secret-key-at-least-64-characters-long-1234567890"
+      JWT_EXPIRATION: "86400000"
+
+      MAIL_USERNAME: "ci@example.com"
+      MAIL_PASSWORD: "ci-test-only"
+
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+      SPRING_KAFKA_LISTENER_AUTO_STARTUP: "false"
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "create-drop"
+      SPRING_SQL_INIT_MODE: "never"
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Set up Java 21 and Maven cache
+        uses: actions/setup-java@v4
+
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: ${{ matrix.service }}/pom.xml
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x "${{ matrix.service }}/mvnw"
+
+      - name: Build and test ${{ matrix.service }}
+        working-directory: ${{ matrix.service }}
+        run: ./mvnw --batch-mode --no-transfer-progress clean verify
