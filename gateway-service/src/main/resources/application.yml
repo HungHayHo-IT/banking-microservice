@@ -12,10 +12,6 @@ spring:
             locator:
               enabled: false
               lowerCaseServiceId: true
-  security:
-    user:
-      name: disabled
-      password: disabled
   data:
     redis:
       connect-timeout: 2s
@@ -44,12 +40,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,metrics
   endpoint:
-    gateway:
-      enabled: true
     shutdown:
-      enabled: true
+      enabled: false
   info:
     env:
       enabled: true

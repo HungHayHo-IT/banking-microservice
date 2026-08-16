@@ -51,10 +51,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,metrics
   endpoint:
     shutdown:
-      enabled: true
+      enabled: false
   info:
     env:
       enabled: true

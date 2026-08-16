@@ -15,13 +15,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    shutdown:
+      enabled: false
   health:
     readiness-state:
       enabled: true
     liveness-state:
       enabled: true
-  endpoint:
-    health:
-      probes:
-        enabled: true
