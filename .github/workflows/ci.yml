@@ -24,12 +24,21 @@ jobs:
       fail-fast: false
 
       matrix:
-        service:
-          - discovery-service
-          - gateway-service
-          - user-account-service
-          - transaction-service
-          - notification-service
+        include:
+          - service: discovery-service
+            eureka-enabled: "true"
+
+          - service: gateway-service
+            eureka-enabled: "false"
+
+          - service: user-account-service
+            eureka-enabled: "false"
+
+          - service: transaction-service
+            eureka-enabled: "false"
+
+          - service: notification-service
+            eureka-enabled: "false"
 
     services:
       mysql:
@@ -59,8 +68,8 @@ jobs:
       MAIL_USERNAME: "ci@example.com"
       MAIL_PASSWORD: "ci-test-only"
 
-      EUREKA_CLIENT_ENABLED: "false"
-      SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+      EUREKA_CLIENT_ENABLED: ${{ matrix.eureka-enabled }}
+      SPRING_CLOUD_DISCOVERY_ENABLED: ${{ matrix.eureka-enabled }}
       SPRING_KAFKA_LISTENER_AUTO_STARTUP: "false"
 
       SPRING_JPA_HIBERNATE_DDL_AUTO: "create-drop"
