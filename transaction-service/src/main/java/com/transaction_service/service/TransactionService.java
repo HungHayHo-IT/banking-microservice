@@ -1,19 +1,18 @@
 package com.transaction_service.service;
 
-import com.transaction_service.dto.ApiResponse;
-import com.transaction_service.dto.TransactionDTO;
-import com.transaction_service.dto.TransactionRequest;
+import com.transaction_service.dto.*;
 import com.transaction_service.enums.TransactionDirection;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TransactionService {
-    ApiResponse<TransactionDTO> deposit(TransactionRequest request, String correlationid);
+    ApiResponse<TransactionDTO> deposit(DepositRequest request, String correlationid);
 
-    ApiResponse<TransactionDTO> transfer(TransactionRequest request,String correlationid);
+    ApiResponse<TransactionDTO> transfer(TransferRequest request, String correlationid);
 
-    ApiResponse<TransactionDTO> withdraw(TransactionRequest request,String correlationid);
+    ApiResponse<TransactionDTO> withdraw(WithdrawRequest request,String correlationid);
+
 
     ApiResponse<TransactionDTO> getTransactionByReference(String reference);
 

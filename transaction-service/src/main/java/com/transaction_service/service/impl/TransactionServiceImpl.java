@@ -1,12 +1,10 @@
 package com.transaction_service.service.impl;
 
-import com.transaction_service.dto.AccountDTO;
-import com.transaction_service.dto.ApiResponse;
-import com.transaction_service.dto.TransactionDTO;
-import com.transaction_service.dto.TransactionRequest;
+import com.transaction_service.dto.*;
 import com.transaction_service.entity.Transaction;
 import com.transaction_service.enums.*;
 import com.transaction_service.exception.BadRequestException;
+import com.transaction_service.exception.ForbiddenException;
 import com.transaction_service.exception.NotFoundException;
 import com.transaction_service.feign.AccountFeignClient;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
@@ -35,12 +33,12 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionEventPublisher transactionEventPublisher;
 
     @Override
-    public ApiResponse<TransactionDTO> deposit(TransactionRequest request , String correlationid) {
+    public ApiResponse<TransactionDTO> deposit(DepositRequest request, String correlationid) {
         fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
 
         Transaction deposit = Transaction.builder()
-                .reference("DEP" + UUID.randomUUID().toString().substring(0, 8))
-                .fromAccountNumber(request.getFromAccountNumber())
+                .reference(generateReference("DEP"))
+                .fromAccountNumber("BANK_NOW_VAULT")
                 .fromBankCode("BANK NOW")
                 .currency(Currency.VND)
                 .toAccountNumber(request.getToAccountNumber())
@@ -75,11 +73,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> transfer(TransactionRequest request,String correlationid) {
+    public ApiResponse<TransactionDTO> transfer(TransferRequest request, String correlationid) {
         if (request.getFromAccountNumber() == null || request.getFromAccountNumber().isEmpty()) {
             throw new BadRequestException("From Account is Needed");
         }
-        AccountDTO sourceAccount = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
+        AccountDTO sourceAccount = fetchOwnedAccount(request.getFromAccountNumber(),correlationid);
 
         String loggedInUserEmail = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,7 +107,7 @@ public class TransactionServiceImpl implements TransactionService {
         fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
 
         Transaction transferTnx = Transaction.builder()
-                .reference("TRF" + UUID.randomUUID().toString().substring(0, 8))
+                .reference(generateReference("TRF"))
                 .fromAccountNumber(request.getFromAccountNumber())
                 .fromBankCode("BANK NOW")
                 .currency(Currency.VND)
@@ -154,8 +152,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> withdraw(TransactionRequest request, String correlationid) {
-        AccountDTO account = fetchAndValidateAccount(request.getFromAccountNumber(),correlationid);
+    public ApiResponse<TransactionDTO> withdraw(WithdrawRequest request, String correlationid) {
+        AccountDTO account = fetchOwnedAccount(
+                request.getFromAccountNumber(),
+                correlationid
+        );
 
         if (account.getAccountStatus() != AccountStatus.ACTIVE) {
             throw new BadRequestException("Inactive Account");
@@ -166,16 +167,16 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         Transaction withdrawalTxn = Transaction.builder()
-                .reference("WID" + UUID.randomUUID().toString().substring(0, 8))
+                .reference(generateReference("WDR"))
                 .fromAccountNumber(request.getFromAccountNumber())
                 .fromBankCode("BANK NOW")
                 .currency(Currency.VND)
-                .toAccountNumber("VULT")
-                .toBankCode("VULT")
+                .toAccountNumber("BANK_NOW_VAULT")
+                .toBankCode("BANK_NOW")
                 .amount(request.getAmount())
                 .channel(Channel.API)
                 .description(request.getDescription())
-                .transactionType(TransactionType.TRANSFER)
+                .transactionType(TransactionType.WITHDRAWAL)
                 .transactionStatus(TransactionStatus.SUCCESS)
                 .transactionDirection(TransactionDirection.DEBIT)
                 .createdAt(LocalDateTime.now())
@@ -200,6 +201,8 @@ public class TransactionServiceImpl implements TransactionService {
         );
     }
 
+
+
     @Override
     public ApiResponse<TransactionDTO> getTransactionByReference(String reference) {
 
@@ -211,7 +214,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionDTO dto = modelMapper.map(txn, TransactionDTO.class);
 
         return new ApiResponse<>(
-                201,
+                200,
                 "Transaction Retrieved",
                 dto
         );
@@ -228,7 +231,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionDTO> transactionDTOS = transactionList.stream().map(t-> modelMapper.map(t, TransactionDTO.class)).toList();
 
         return new ApiResponse<>(
-                201,
+                200,
                 "Transaction History Retrieved for the Account",
                 transactionDTOS
         );
@@ -243,7 +246,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionDTO> transactionDTOS = history.stream().map(t-> modelMapper.map(t, TransactionDTO.class)).toList();
 
         return new ApiResponse<>(
-                201,
+                200,
                 "Transaction History Retrieved for the Account",
                 transactionDTOS
         );
@@ -260,7 +263,7 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionDTO> transactionDTOS = transactions.stream().map(t-> modelMapper.map(t, TransactionDTO.class)).toList();
 
         return new ApiResponse<>(
-                201,
+                200,
                 "Transaction History Retrieved by direction for the Account",
                 transactionDTOS
         );
@@ -270,7 +273,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     private AccountDTO fetchAndValidateAccount(String accountNumber,String correlationId) {
 
-        ApiResponse<AccountDTO> response = accountFeignClient.getAccountByNumber(accountNumber,correlationId);
+        ApiResponse<AccountDTO> response =
+                accountFeignClient.getAccountByNumber(
+                        accountNumber,
+                        correlationId
+                ); 
 
         if (response == null || response.data() == null) {
             throw new NotFoundException("Account " + accountNumber + "not found");
@@ -284,5 +291,33 @@ public class TransactionServiceImpl implements TransactionService {
 
         return account;
 
+    }
+
+    private AccountDTO fetchOwnedAccount(
+            String accountNumber,
+            String correlationId) {
+
+        AccountDTO account =
+                fetchAndValidateAccount(accountNumber, correlationId);
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ForbiddenException("Authentication is required");
+        }
+
+        String loggedInEmail = authentication.getName();
+
+        if (!account.getOwnerEmail().equalsIgnoreCase(loggedInEmail)) {
+            throw new ForbiddenException(
+                    "You are not the owner of account " + accountNumber);
+        }
+
+        return account;
+    }
+
+    private String generateReference(String prefix) {
+        return prefix + "-" + UUID.randomUUID();
     }
 }

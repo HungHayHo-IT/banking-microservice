@@ -1,8 +1,6 @@
 package com.transaction_service.controller;
 
-import com.transaction_service.dto.ApiResponse;
-import com.transaction_service.dto.TransactionDTO;
-import com.transaction_service.dto.TransactionRequest;
+import com.transaction_service.dto.*;
 import com.transaction_service.enums.TransactionDirection;
 import com.transaction_service.service.TransactionService;
 import jakarta.validation.Valid;
@@ -18,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,12 +48,13 @@ public class TransactionController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy tài khoản nguồn hoặc tài khoản đích")
     })
     public ResponseEntity<ApiResponse<TransactionDTO>> transfer(
-            @Valid @RequestBody TransactionRequest request,
-            @Parameter(description = "Correlation ID dùng để tracing request giữa các service", required = true)
-            @RequestHeader("banknow-correlation-id") String correlationId
+            @Valid @RequestBody TransferRequest request,
+            @RequestHeader("banknow-correlation-id")
+            String correlationId
     ) {
-        logger.debug("bankapp-correlation-id found: {}", correlationId);
-        return ResponseEntity.ok(transactionService.transfer(request, correlationId));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(transactionService.transfer(request, correlationId));
     }
 
     @PostMapping("/withdraw")
@@ -70,12 +70,13 @@ public class TransactionController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Không tìm thấy tài khoản nguồn")
     })
     public ResponseEntity<ApiResponse<TransactionDTO>> withdraw(
-            @Valid @RequestBody TransactionRequest request,
-            @Parameter(description = "Correlation ID dùng để tracing request giữa các service", required = true)
-            @RequestHeader("banknow-correlation-id") String correlationId
+            @Valid @RequestBody WithdrawRequest request,
+            @RequestHeader("banknow-correlation-id")
+            String correlationId
     ) {
-        logger.debug("bankapp-correlation-id found: {}", correlationId);
-        return ResponseEntity.ok(transactionService.withdraw(request, correlationId));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(transactionService.withdraw(request, correlationId));
     }
 
     @GetMapping("/history")

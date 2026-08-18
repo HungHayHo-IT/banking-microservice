@@ -22,6 +22,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -44,22 +45,22 @@ public class AuthServiceImpl implements AuthService {
     private final AccountEventPublisher accountEventPublisher;
 
     @Override
+    @Transactional
     public ApiResponse<AuthResponse> registerUser(RegistrationRequest registrationRequest) {
         log.info("We are inside the register user service method");
         if(userRepository.existsByEmail(registrationRequest.getEmail())){
             throw new BadRequestException("Account already exist for this email");
         }
 
+
+
+        Role customerRole = roleRepository.findByName("CUSTOMER")
+                .orElseThrow(() ->
+                        new NotFoundException("CUSTOMER role not found"));
+
         Set<Role> roles = new HashSet<>();
+        roles.add(customerRole);
 
-        String roleName = (registrationRequest.getRole() != null && !registrationRequest.getRole().isBlank())
-                ? registrationRequest.getRole().toUpperCase()
-                : "CUSTOMER";
-
-        Role databaseRole = roleRepository.findByName(roleName)
-                .orElseThrow(()-> new NotFoundException("Role with name" + roleName + " Not found"));
-
-        roles.add(databaseRole);
         User userToSave = User.builder()
                 .email(registrationRequest.getEmail())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
@@ -97,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
         AuthResponse authResponse = AuthResponse.builder()
                 .user(userDTO)
                 .build();
-        return new ApiResponse<>(HttpStatus.CONTINUE.value(), "User account created successfully", authResponse);
+        return new ApiResponse<>(HttpStatus.CREATED.value(), "User account created successfully", authResponse);
     }
 
     @Override

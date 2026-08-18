@@ -24,7 +24,7 @@ public class AccountBalanceConsumer {
     public void consumerBalanceUpdate(BalanceUpdateEvent event){
         log.info("processing balance update for account number: {}", event.getAccountNumber());
 
-        Account account = accountRepository.findByAccountNumber(event.getAccountNumber())
+        Account account = accountRepository.findByAccountNumberForUpdate(event.getAccountNumber())
                 .orElseThrow(() -> new NotFoundException("account Number nor found"));
 
         if(event.getTransactionDirection() == TransactionDirection.CREDIT){
