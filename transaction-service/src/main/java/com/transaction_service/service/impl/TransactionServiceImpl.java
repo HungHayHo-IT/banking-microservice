@@ -11,12 +11,16 @@ import com.transaction_service.kafka.dto.BalanceUpdateEvent;
 import com.transaction_service.kafka.service.TransactionEventPublisher;
 import com.transaction_service.repository.TransactionRepository;
 import com.transaction_service.service.TransactionService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import feign.FeignException;
+import com.transaction_service.exception.ServiceUnavailableException;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,82 +77,110 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ApiResponse<TransactionDTO> transfer(TransferRequest request, String correlationid) {
-        if (request.getFromAccountNumber() == null || request.getFromAccountNumber().isEmpty()) {
-            throw new BadRequestException("From Account is Needed");
-        }
-        AccountDTO sourceAccount = fetchOwnedAccount(request.getFromAccountNumber(),correlationid);
+    public ApiResponse<TransactionDTO> transfer(
+            TransferRequest request,
+            String correlationId) {
 
-        String loggedInUserEmail = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String reference = generateReference("TRF");
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            loggedInUserEmail = authentication.getName();
-        }
-        log.info("Auth email is: {}", loggedInUserEmail);
-        log.info("Account email is: {}", sourceAccount.getOwnerEmail());
-
-        if (!sourceAccount.getOwnerEmail().equals(loggedInUserEmail)) {
-            throw new BadRequestException("Access Denied: You are not authorized to perform a transfer on behalf of another person");
-        }
-
-        if (sourceAccount.getAccountStatus() != AccountStatus.ACTIVE) {
-            throw new BadRequestException("Transaction Failed: Your account is inactive, please contact customer support");
-        }
-
-        if (sourceAccount.getBalance().compareTo(request.getAmount()) < 0) {
-            throw new BadRequestException("Insufficient Account Balance");
-        }
-
-        if (request.getFromAccountNumber().equals(request.getToAccountNumber())) {
-            throw new BadRequestException("You cannot transfer to the same account number(Yourself)");
-        }
-
-        fetchAndValidateAccount(request.getToAccountNumber(),correlationid);
-
-        Transaction transferTnx = Transaction.builder()
-                .reference(generateReference("TRF"))
+        Transaction transaction = Transaction.builder()
+                .reference(reference)
                 .fromAccountNumber(request.getFromAccountNumber())
                 .fromBankCode("BANK NOW")
-                .currency(Currency.VND)
                 .toAccountNumber(request.getToAccountNumber())
                 .toBankCode("BANK NOW")
                 .amount(request.getAmount())
+                .currency(Currency.VND)
                 .channel(Channel.API)
                 .description(request.getDescription())
                 .transactionType(TransactionType.TRANSFER)
-                .transactionStatus(TransactionStatus.SUCCESS)
+                .transactionStatus(TransactionStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
-        Transaction savedTransaction = transactionRepository.save(transferTnx);
 
-        transactionEventPublisher.sendBalanceUpdate(BalanceUpdateEvent.builder()
-                .accountNumber(request.getFromAccountNumber())
-                .amount(request.getAmount())
-                .currency(Currency.VND)
-                .description(request.getDescription())
-                .transactionDirection(TransactionDirection.DEBIT)
-                .transactionStatus(TransactionStatus.SUCCESS)
-                .reference(savedTransaction.getReference())
-                .build());
+        Transaction saved =
+                transactionRepository.save(transaction);
 
-        transactionEventPublisher.sendBalanceUpdate(BalanceUpdateEvent.builder()
-                .accountNumber(request.getToAccountNumber())
-                .amount(request.getAmount())
-                .currency(Currency.VND)
-                .description(request.getDescription())
-                .transactionDirection(TransactionDirection.CREDIT)
-                .transactionStatus(TransactionStatus.SUCCESS)
-                .reference(savedTransaction.getReference())
-                .build());
+        try {
+            InternalTransferRequest internalRequest =
+                    InternalTransferRequest.builder()
+                            .reference(reference)
+                            .fromAccountNumber(
+                                    request.getFromAccountNumber()
+                            )
+                            .toAccountNumber(
+                                    request.getToAccountNumber()
+                            )
+                            .amount(request.getAmount())
+                            .build();
 
-        return new ApiResponse<>(
-                201,
-                "Transfer Successful",
-                modelMapper.map(savedTransaction, TransactionDTO.class)
-        );
+            ApiResponse<InternalTransferResponse> response =
+                    accountFeignClient.transfer(
+                            internalRequest,
+                            correlationId
+                    );
 
+            if (response == null || response.data() == null) {
+                throw new ServiceUnavailableException(
+                        "User Account Service returned no data"
+                );
+            }
 
+            saved.setTransactionStatus(
+                    TransactionStatus.SUCCESS
+            );
+
+            Transaction completed =
+                    transactionRepository.save(saved);
+
+            publishNotificationEvents(
+                    response.data(),
+                    completed,
+                    request,
+                    correlationId
+            );
+
+            return new ApiResponse<>(
+                    200,
+                    "Transfer Successful",
+                    modelMapper.map(
+                            completed,
+                            TransactionDTO.class
+                    )
+            );
+
+        } catch (FeignException exception) {
+            markFailed(saved, correlationId, exception);
+
+            if (exception.status() == 400) {
+                throw new BadRequestException(
+                        "Transfer was rejected by User Account Service"
+                );
+            }
+
+            if (exception.status() == 403) {
+                throw new ForbiddenException(
+                        "You are not allowed to transfer from this account"
+                );
+            }
+
+            if (exception.status() == 404) {
+                throw new NotFoundException(
+                        "Source or destination account was not found"
+                );
+            }
+
+            throw new ServiceUnavailableException(
+                    "User Account Service is unavailable"
+            );
+
+        } catch (RuntimeException exception) {
+            markFailed(saved, correlationId, exception);
+
+            throw new ServiceUnavailableException(
+                    "Transfer could not be completed"
+            );
+        }
     }
 
     @Override
@@ -319,5 +351,73 @@ public class TransactionServiceImpl implements TransactionService {
 
     private String generateReference(String prefix) {
         return prefix + "-" + UUID.randomUUID();
+    }
+
+    private void markFailed(
+            Transaction transaction,
+            String correlationId,
+            Exception exception) {
+
+        transaction.setTransactionStatus(
+                TransactionStatus.FAILED
+        );
+
+        transactionRepository.save(transaction);
+
+        log.error(
+                "Transfer failed. reference={}, correlationId={}",
+                transaction.getReference(),
+                correlationId,
+                exception
+        );
+    }
+
+    private void publishNotificationEvents(
+            InternalTransferResponse result,
+            Transaction transaction,
+            TransferRequest request,
+            String correlationId) {
+
+        transactionEventPublisher.sendTransactionNotification(
+                toNotificationEvent(
+                        result.getDebitAccount(),
+                        TransactionDirection.DEBIT,
+                        transaction,
+                        request,
+                        correlationId
+                )
+        );
+
+        transactionEventPublisher.sendTransactionNotification(
+                toNotificationEvent(
+                        result.getCreditAccount(),
+                        TransactionDirection.CREDIT,
+                        transaction,
+                        request,
+                        correlationId
+                )
+        );
+    }
+
+    private BalanceUpdateEvent toNotificationEvent(
+            AccountBalanceSnapshot account,
+            TransactionDirection direction,
+            Transaction transaction,
+            TransferRequest request,
+            String correlationId) {
+
+        return BalanceUpdateEvent.builder()
+                .accountNumber(account.getAccountNumber())
+                .email(account.getEmail())
+                .firstName(account.getFirstName())
+                .currentBalance(account.getCurrentBalance())
+                .amount(request.getAmount())
+                .currency(Currency.VND)
+                .description(request.getDescription())
+                .transactionDirection(direction)
+                .transactionStatus(TransactionStatus.SUCCESS)
+                .reference(transaction.getReference())
+                .correlationId(correlationId)
+                .build();
     }
 }

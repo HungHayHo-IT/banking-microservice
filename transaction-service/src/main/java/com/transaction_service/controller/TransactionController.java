@@ -52,9 +52,9 @@ public class TransactionController {
             @RequestHeader("banknow-correlation-id")
             String correlationId
     ) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(transactionService.transfer(request, correlationId));
+        return ResponseEntity.ok(
+                transactionService.transfer(request, correlationId)
+        );
     }
 
     @PostMapping("/withdraw")

@@ -33,6 +33,7 @@ public class BalanceUpdateEvent {
     private String firstName;
     private BigDecimal currentBalance;
     private String description;
+    private String correlationId;
 
 
 

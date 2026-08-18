@@ -28,7 +28,11 @@ public class NotificationConsumerListener {
 
     @KafkaListener(topics = "balance-update-notification-events", groupId = "notification-group")
     public void consumerBalanceUpdateEvent(BalanceUpdateEvent event) {
-        log.info("Received balance update  event");
+        log.info(
+                "Received transaction notification. reference={}, correlationId={}",
+                event.getReference(),
+                event.getCorrelationId()
+        );
         try {
             emailService.sendTransactionAlertEmail(event);
 

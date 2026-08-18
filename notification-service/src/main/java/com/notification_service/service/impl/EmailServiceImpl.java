@@ -110,6 +110,7 @@ public class EmailServiceImpl implements EmailService {
                     .subject(subject)
                     .message(htmlEmailTemplate)
                     .status(NotificationStatus.SENT)
+                    .transactionReference(event.getReference())
                     .build();
 
             //send the email out
