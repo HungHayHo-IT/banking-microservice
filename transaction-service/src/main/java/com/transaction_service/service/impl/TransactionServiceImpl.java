@@ -8,6 +8,8 @@ import com.transaction_service.exception.ForbiddenException;
 import com.transaction_service.exception.NotFoundException;
 import com.transaction_service.feign.AccountFeignClient;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
+import com.transaction_service.kafka.dto.TransactionCompletedEvent;
+import com.transaction_service.kafka.dto.TransactionFailedEvent;
 import com.transaction_service.kafka.service.TransactionEventPublisher;
 import com.transaction_service.repository.TransactionRepository;
 import com.transaction_service.service.TransactionService;
@@ -22,6 +24,7 @@ import feign.FeignException;
 import com.transaction_service.exception.ServiceUnavailableException;
 
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -67,7 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionStatus(TransactionStatus.SUCCESS)
                 .reference(savedTransaction.getReference())
                 .build();
-        transactionEventPublisher.sendBalanceUpdate(balanceUpdateEvent);
+        transactionEventPublisher.publishBalanceUpdateRequested(balanceUpdateEvent);
 
         return new ApiResponse<>(
                 201,
@@ -133,6 +136,10 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction completed =
                     transactionRepository.save(saved);
 
+            transactionEventPublisher.publishTransactionCompleted(
+                    toTransactionCompletedEvent(completed, correlationId)
+            );
+
             publishNotificationEvents(
                     response.data(),
                     completed,
@@ -176,7 +183,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         } catch (RuntimeException exception) {
             markFailed(saved, correlationId, exception);
-
+            transactionEventPublisher.publishTransactionFailed(
+                    toTransactionFailedEvent(
+                            saved,
+                            correlationId,
+                            exception
+                    )
+            );
             throw new ServiceUnavailableException(
                     "Transfer could not be completed"
             );
@@ -216,7 +229,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedWithdrawalTnx = transactionRepository.save(withdrawalTxn);
 
-        transactionEventPublisher.sendBalanceUpdate(BalanceUpdateEvent.builder()
+        transactionEventPublisher.publishBalanceUpdateRequested(BalanceUpdateEvent.builder()
                 .accountNumber(request.getFromAccountNumber())
                 .amount(request.getAmount())
                 .currency(Currency.VND)
@@ -378,7 +391,7 @@ public class TransactionServiceImpl implements TransactionService {
             TransferRequest request,
             String correlationId) {
 
-        transactionEventPublisher.sendTransactionNotification(
+        transactionEventPublisher.publishBalanceUpdateNotification(
                 toNotificationEvent(
                         result.getDebitAccount(),
                         TransactionDirection.DEBIT,
@@ -388,7 +401,7 @@ public class TransactionServiceImpl implements TransactionService {
                 )
         );
 
-        transactionEventPublisher.sendTransactionNotification(
+        transactionEventPublisher.publishBalanceUpdateRequested(
                 toNotificationEvent(
                         result.getCreditAccount(),
                         TransactionDirection.CREDIT,
@@ -418,6 +431,43 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionStatus(TransactionStatus.SUCCESS)
                 .reference(transaction.getReference())
                 .correlationId(correlationId)
+                .build();
+    }
+    private TransactionCompletedEvent toTransactionCompletedEvent(
+            Transaction transaction,
+            String correlationId) {
+
+        return TransactionCompletedEvent.builder()
+                .eventId(UUID.randomUUID())
+                .occurredAt(Instant.now())
+                .transactionReference(transaction.getReference())
+                .transactionType(transaction.getTransactionType().name())
+                .fromAccountNumber(transaction.getFromAccountNumber())
+                .toAccountNumber(transaction.getToAccountNumber())
+                .amount(transaction.getAmount())
+                .currency(transaction.getCurrency().name())
+                .status(transaction.getTransactionStatus().name())
+                .correlationId(correlationId)
+                .build();
+    }
+
+    private TransactionFailedEvent toTransactionFailedEvent(
+            Transaction transaction,
+            String correlationId,
+            RuntimeException exception) {
+
+        return TransactionFailedEvent.builder()
+                .eventId(UUID.randomUUID())
+                .occurredAt(Instant.now())
+                .transactionReference(transaction.getReference())
+                .transactionType(transaction.getTransactionType().name())
+                .fromAccountNumber(transaction.getFromAccountNumber())
+                .toAccountNumber(transaction.getToAccountNumber())
+                .amount(transaction.getAmount())
+                .currency(transaction.getCurrency().name())
+                .status(TransactionStatus.FAILED.name())
+                .correlationId(correlationId)
+                .failureReason(exception.getClass().getSimpleName())
                 .build();
     }
 }

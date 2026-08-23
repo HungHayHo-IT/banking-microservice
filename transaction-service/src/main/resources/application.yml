@@ -16,11 +16,20 @@ spring:
     init:
       mode: always
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
+      client-id: ${spring.application.name}-producer
+      acks: all
+      retries: 5
+
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
       properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
         spring.json.add.type.headers: true
   cloud:
     openfeign:
@@ -86,3 +95,11 @@ logging:
   level:
     com:
       transaction_service: DEBUG
+
+app:
+  kafka:
+    topics:
+      balance-update-requested: balance-update-events
+      balance-update-notification: balance-update-notification-events
+      transaction-completed: transaction-completed-events
+      transaction-failed: transaction-failed-events

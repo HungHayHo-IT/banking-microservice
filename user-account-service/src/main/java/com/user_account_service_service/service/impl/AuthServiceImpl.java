@@ -9,7 +9,7 @@ import com.user_account_service_service.enums.AccountType;
 import com.user_account_service_service.enums.Currency;
 import com.user_account_service_service.exceptions.BadRequestException;
 import com.user_account_service_service.exceptions.NotFoundException;
-import com.user_account_service_service.kafka.dto.UserRegistrationEvent;
+import com.user_account_service_service.kafka.dto.UserRegisteredEvent;
 import com.user_account_service_service.kafka.service.AccountEventPublisher;
 import com.user_account_service_service.repository.AccountRepository;
 import com.user_account_service_service.repository.RoleRepository;
@@ -25,9 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -84,14 +86,18 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         accountRepository.save(accountToSaveToDb);
 
-        UserRegistrationEvent event = UserRegistrationEvent.builder()
+        UserRegisteredEvent event = UserRegisteredEvent.builder()
+                .eventId(UUID.randomUUID())
+                .occurredAt(Instant.now())
+                .userId(savedUser.getId())
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
                 .accountNumber(accountNumber)
                 .bankName("BANK NOW")
                 .build();
-        accountEventPublisher.publishedUserRegistrationEvent(event);
+
+        accountEventPublisher.publishUserRegisteredEvent(event);
 
         UserDTO userDTO = modelMapper.map(savedUser, UserDTO.class);
 

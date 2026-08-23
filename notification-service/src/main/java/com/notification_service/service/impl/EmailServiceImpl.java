@@ -5,7 +5,7 @@ import com.notification_service.enums.NotificationStatus;
 import com.notification_service.enums.NotificationType;
 import com.notification_service.enums.transaction.TransactionDirection;
 import com.notification_service.kafka.dto.BalanceUpdateEvent;
-import com.notification_service.kafka.dto.UserRegistrationEvent;
+import com.notification_service.kafka.dto.UserRegisteredEvent;
 import com.notification_service.repository.NotificationRepository;
 import com.notification_service.service.EmailService;
 import jakarta.mail.MessagingException;
@@ -35,7 +35,7 @@ public class EmailServiceImpl implements EmailService {
     private String fromEmail;
 
     @Override
-    public void sendWelcomeEmail(UserRegistrationEvent event) {
+    public void sendWelcomeEmail(UserRegisteredEvent event) {
         try{
             Context context = new Context();
             context.setVariable("firstName", event.getFirstName());

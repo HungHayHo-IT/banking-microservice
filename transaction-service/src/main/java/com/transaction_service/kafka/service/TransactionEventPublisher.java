@@ -1,63 +1,108 @@
 package com.transaction_service.kafka.service;
 
+import com.transaction_service.config.KafkaTopicProperties;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
+import com.transaction_service.kafka.dto.TransactionCompletedEvent;
+import com.transaction_service.kafka.dto.TransactionFailedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionEventPublisher {
 
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTopicProperties topics;
 
-    private final KafkaTemplate<String,Object> kafkaTemplate;
-    private static final String NOTIFICATION_TOPIC =
-            "balance-update-notification-events";
+    public CompletableFuture<SendResult<String, Object>>
+    publishBalanceUpdateRequested(BalanceUpdateEvent event) {
 
-    public void sendBalanceUpdate(BalanceUpdateEvent event) {
-        kafkaTemplate.send("balance-update-events", event.getAccountNumber(), event)
-                .whenComplete((result, ex) -> {
-                    if (ex == null) {
-
-                        String topicResult = result.getRecordMetadata().topic();
-                        long topicOffset = result.getRecordMetadata().offset();
-
-                        log.info("SENT MESSAGE to TOPIC {} OFFSET {}", topicResult, topicOffset);
-
-                    }
-                });
+        return publish(
+                topics.getBalanceUpdateRequested(),
+                event.getAccountNumber(),
+                event
+        );
     }
 
-    public void sendTransactionNotification(
-            BalanceUpdateEvent event) {
+    public CompletableFuture<SendResult<String, Object>>
+    publishBalanceUpdateNotification(BalanceUpdateEvent event) {
 
-        kafkaTemplate.send(
-                NOTIFICATION_TOPIC,
+        return publish(
+                topics.getBalanceUpdateNotification(),
                 event.getReference(),
                 event
-        ).whenComplete((result, exception) -> {
+        );
+    }
 
-            if (exception == null) {
-                log.info(
-                        "Notification event sent. reference={}, correlationId={}",
-                        event.getReference(),
-                        event.getCorrelationId()
-                );
-            } else {
-                /*
-                 * Chỉ log lỗi.
-                 * Không đổi transaction từ SUCCESS sang FAILED
-                 * chỉ vì gửi email thất bại.
-                 */
-                log.error(
-                        "Notification event failed. reference={}, correlationId={}",
-                        event.getReference(),
-                        event.getCorrelationId(),
-                        exception
-                );
-            }
-        });
+    public CompletableFuture<SendResult<String, Object>>
+    publishTransactionCompleted(TransactionCompletedEvent event) {
+
+        return publish(
+                topics.getTransactionCompleted(),
+                event.getTransactionReference(),
+                event
+        );
+    }
+
+    public CompletableFuture<SendResult<String, Object>>
+    publishTransactionFailed(TransactionFailedEvent event) {
+
+        return publish(
+                topics.getTransactionFailed(),
+                event.getTransactionReference(),
+                event
+        );
+    }
+
+    private CompletableFuture<SendResult<String, Object>> publish(
+            String topic,
+            String key,
+            Object event) {
+
+        try {
+            return kafkaTemplate
+                    .send(topic, key, event)
+                    .whenComplete((result, exception) -> {
+
+                        if (exception != null) {
+                            log.error(
+                                    "Kafka publish failed. topic={}, key={}, eventType={}",
+                                    topic,
+                                    key,
+                                    event.getClass().getSimpleName(),
+                                    exception
+                            );
+                            return;
+                        }
+
+                        var metadata = result.getRecordMetadata();
+
+                        log.info(
+                                "Kafka publish succeeded. topic={}, partition={}, offset={}, key={}, eventType={}",
+                                metadata.topic(),
+                                metadata.partition(),
+                                metadata.offset(),
+                                key,
+                                event.getClass().getSimpleName()
+                        );
+                    });
+
+        } catch (RuntimeException exception) {
+            log.error(
+                    "Kafka send could not be started. topic={}, key={}, eventType={}",
+                    topic,
+                    key,
+                    event.getClass().getSimpleName(),
+                    exception
+            );
+
+            return CompletableFuture.failedFuture(exception);
+        }
     }
 }

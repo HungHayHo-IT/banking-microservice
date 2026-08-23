@@ -1,41 +1,91 @@
 package com.user_account_service_service.kafka.service;
 
+import com.user_account_service_service.config.KafkaTopicProperties;
 import com.user_account_service_service.kafka.dto.BalanceUpdateEvent;
-import com.user_account_service_service.kafka.dto.UserRegistrationEvent;
+import com.user_account_service_service.kafka.dto.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AccountEventPublisher {
 
-    private final KafkaTemplate<String,Object> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTopicProperties topics;
 
-    private static final  String USER_TOPIC = "user-registered-events";
-    private static final String BALANCE_UPDATE_TOPIC = "balance-update-notification-events";
+    public CompletableFuture<SendResult<String, Object>>
+    publishUserRegisteredEvent(UserRegisteredEvent event) {
 
-    public void publishedUserRegistrationEvent(UserRegistrationEvent event){
-        try{
-            kafkaTemplate.send(USER_TOPIC,event.getEmail(),event);
-            log.info("Event Sent Out {}", event.getEmail());
+        String key = event.getUserId().toString();
 
-        }catch (Exception e){
-            log.info("Failed to publish user registered event: {}", e.getMessage());
-        }
+        return publish(
+                topics.getUserRegistered(),
+                key,
+                event
+        );
     }
 
-    public void publishTransactionNotificationEvent(BalanceUpdateEvent event){
+    public CompletableFuture<SendResult<String, Object>>
+    publishBalanceUpdateNotification(BalanceUpdateEvent event) {
+
+        String key = event.getAccountNumber();
+
+        return publish(
+                topics.getBalanceUpdateNotification(),
+                key,
+                event
+        );
+    }
+
+    private CompletableFuture<SendResult<String, Object>> publish(
+            String topic,
+            String key,
+            Object event) {
+
         try {
-            kafkaTemplate.send(BALANCE_UPDATE_TOPIC, event.getEmail(), event);
-            log.info("Balance Update Event Sent Out {}", event.getEmail());
+            return kafkaTemplate
+                    .send(topic, key, event)
+                    .whenComplete((result, exception) -> {
 
-        } catch (Exception e) {
-            log.info("Failed to Balance Update event: {}", e.getMessage());
+                        if (exception != null) {
+                            log.error(
+                                    "Kafka publish failed. topic={}, key={}, eventType={}",
+                                    topic,
+                                    key,
+                                    event.getClass().getSimpleName(),
+                                    exception
+                            );
+                            return;
+                        }
+
+                        var metadata = result.getRecordMetadata();
+
+                        log.info(
+                                "Kafka publish succeeded. topic={}, partition={}, offset={}, key={}, eventType={}",
+                                metadata.topic(),
+                                metadata.partition(),
+                                metadata.offset(),
+                                key,
+                                event.getClass().getSimpleName()
+                        );
+                    });
+
+        } catch (RuntimeException exception) {
+            log.error(
+                    "Kafka send could not be started. topic={}, key={}, eventType={}",
+                    topic,
+                    key,
+                    event.getClass().getSimpleName(),
+                    exception
+            );
+
+            return CompletableFuture.failedFuture(exception);
         }
     }
-
-
 }
