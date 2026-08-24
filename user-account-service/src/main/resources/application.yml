@@ -24,7 +24,7 @@ spring:
       retries: 5
 
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
 
       properties:
         enable.idempotence: true
@@ -88,5 +88,5 @@ logger:
 app:
   kafka:
     topics:
-      user-registered: user-registered-events
+      user-registered: banking.user.registered.v1
       balance-update-notification: balance-update-notification-events

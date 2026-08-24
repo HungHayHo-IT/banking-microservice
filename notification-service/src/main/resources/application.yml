@@ -16,15 +16,24 @@ spring:
     init:
       mode: always
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
     consumer:
-      group-id: notification-group
+      group-id: notification-service-v1
       auto-offset-reset: earliest
+      enable-auto-commit: false
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+
       properties:
-        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
         spring.json.trusted.packages: com.notification_service.kafka.dto
-        spring.json.type.mapping: com.user_account_service_service.kafka.dto.UserRegisteredEvent:com.notification_service.kafka.dto.UserRegisteredEvent,com.user_account_service_service.kafka.dto.BalanceUpdateEvent:com.notification_service.kafka.dto.BalanceUpdateEvent,com.transaction_service.kafka.dto.BalanceUpdateEvent:com.notification_service.kafka.dto.BalanceUpdateEvent
+        spring.json.type.mapping: com.user_account_service_service.kafka.dto.UserRegisteredEvent:com.notification_service.kafka.dto.UserRegisteredEvent,com.transaction_service.kafka.dto.TransactionCompletedEvent:com.notification_service.kafka.dto.TransactionCompletedEvent
+
+    listener:
+      ack-mode: record
   mail:
     host: smtp.gmail.com
     port: 587
@@ -65,5 +74,5 @@ info:
 app:
   kafka:
     topics:
-      user-registered: user-registered-events
-      balance-update-notification: balance-update-notification-events
+      user-registered: banking.user.registered.v1
+      transaction-completed: banking.transaction.completed.v1

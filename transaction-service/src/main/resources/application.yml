@@ -23,7 +23,7 @@ spring:
       retries: 5
 
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
 
       properties:
         enable.idempotence: true
@@ -101,5 +101,5 @@ app:
     topics:
       balance-update-requested: balance-update-events
       balance-update-notification: balance-update-notification-events
-      transaction-completed: transaction-completed-events
+      transaction-completed: banking.transaction.completed.v1
       transaction-failed: transaction-failed-events

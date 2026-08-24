@@ -137,14 +137,12 @@ public class TransactionServiceImpl implements TransactionService {
                     transactionRepository.save(saved);
 
             transactionEventPublisher.publishTransactionCompleted(
-                    toTransactionCompletedEvent(completed, correlationId)
-            );
-
-            publishNotificationEvents(
-                    response.data(),
-                    completed,
-                    request,
-                    correlationId
+                    toTransactionCompletedEvent(
+                            completed,
+                            response.data(),
+                            request,
+                            correlationId
+                    )
             );
 
             return new ApiResponse<>(
@@ -385,68 +383,39 @@ public class TransactionServiceImpl implements TransactionService {
         );
     }
 
-    private void publishNotificationEvents(
-            InternalTransferResponse result,
-            Transaction transaction,
-            TransferRequest request,
-            String correlationId) {
 
-        transactionEventPublisher.publishBalanceUpdateNotification(
-                toNotificationEvent(
-                        result.getDebitAccount(),
-                        TransactionDirection.DEBIT,
-                        transaction,
-                        request,
-                        correlationId
-                )
-        );
 
-        transactionEventPublisher.publishBalanceUpdateRequested(
-                toNotificationEvent(
-                        result.getCreditAccount(),
-                        TransactionDirection.CREDIT,
-                        transaction,
-                        request,
-                        correlationId
-                )
-        );
-    }
 
-    private BalanceUpdateEvent toNotificationEvent(
-            AccountBalanceSnapshot account,
-            TransactionDirection direction,
-            Transaction transaction,
-            TransferRequest request,
-            String correlationId) {
-
-        return BalanceUpdateEvent.builder()
-                .accountNumber(account.getAccountNumber())
-                .email(account.getEmail())
-                .firstName(account.getFirstName())
-                .currentBalance(account.getCurrentBalance())
-                .amount(request.getAmount())
-                .currency(Currency.VND)
-                .description(request.getDescription())
-                .transactionDirection(direction)
-                .transactionStatus(TransactionStatus.SUCCESS)
-                .reference(transaction.getReference())
-                .correlationId(correlationId)
-                .build();
-    }
     private TransactionCompletedEvent toTransactionCompletedEvent(
             Transaction transaction,
-            String correlationId) {
+            InternalTransferResponse result,
+            TransferRequest request,
+            String correlationId
+    ) {
+        AccountBalanceSnapshot debitAccount = result.getDebitAccount();
+        AccountBalanceSnapshot creditAccount = result.getCreditAccount();
 
         return TransactionCompletedEvent.builder()
                 .eventId(UUID.randomUUID())
                 .occurredAt(Instant.now())
+
                 .transactionReference(transaction.getReference())
                 .transactionType(transaction.getTransactionType().name())
-                .fromAccountNumber(transaction.getFromAccountNumber())
-                .toAccountNumber(transaction.getToAccountNumber())
+
+                .fromAccountNumber(debitAccount.getAccountNumber())
+                .fromEmail(debitAccount.getEmail())
+                .fromFirstName(debitAccount.getFirstName())
+                .fromCurrentBalance(debitAccount.getCurrentBalance())
+
+                .toAccountNumber(creditAccount.getAccountNumber())
+                .toEmail(creditAccount.getEmail())
+                .toFirstName(creditAccount.getFirstName())
+                .toCurrentBalance(creditAccount.getCurrentBalance())
+
                 .amount(transaction.getAmount())
                 .currency(transaction.getCurrency().name())
                 .status(transaction.getTransactionStatus().name())
+                .description(request.getDescription())
                 .correlationId(correlationId)
                 .build();
     }

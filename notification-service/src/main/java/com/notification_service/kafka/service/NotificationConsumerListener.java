@@ -1,10 +1,15 @@
 package com.notification_service.kafka.service;
 
+import com.notification_service.enums.transaction.Currency;
+import com.notification_service.enums.transaction.TransactionDirection;
+import com.notification_service.enums.transaction.TransactionStatus;
 import com.notification_service.kafka.dto.BalanceUpdateEvent;
+import com.notification_service.kafka.dto.TransactionCompletedEvent;
 import com.notification_service.kafka.dto.UserRegisteredEvent;
 import com.notification_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -19,41 +24,99 @@ public class NotificationConsumerListener {
             topics = "${app.kafka.topics.user-registered}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void consumeUserRegisteredEvent(UserRegisteredEvent event) {
+    public void consumeUserRegisteredEvent(
+            ConsumerRecord<String, UserRegisteredEvent> record
+    ) {
+        UserRegisteredEvent event = record.value();
 
         log.info(
-                "Received UserRegisteredEvent. eventId={}, userId={}, email={}",
+                "Received UserRegisteredEvent. topic={}, partition={}, offset={}, key={}, eventId={}, email={}",
+                record.topic(),
+                record.partition(),
+                record.offset(),
+                record.key(),
                 event.getEventId(),
-                event.getUserId(),
                 event.getEmail()
         );
 
-        try {
-            emailService.sendWelcomeEmail(event);
-        } catch (Exception exception) {
-            log.error(
-                    "Welcome email failed. eventId={}, userId={}",
-                    event.getEventId(),
-                    event.getUserId(),
-                    exception
-            );
-        }
-    }
+        emailService.sendWelcomeEmail(event);
 
-    @KafkaListener(topics = "balance-update-notification-events", groupId = "notification-group")
-    public void consumerBalanceUpdateEvent(BalanceUpdateEvent event) {
         log.info(
-                "Received transaction notification. reference={}, correlationId={}",
-                event.getReference(),
-                event.getCorrelationId()
+                "UserRegisteredEvent processed successfully. eventId={}",
+                event.getEventId()
         );
-        try {
-            emailService.sendTransactionAlertEmail(event);
-
-        } catch (Exception e) {
-
-            log.error("Error sending email our: {}", e.getMessage());
-        }
     }
 
+    @KafkaListener(
+            topics = "${app.kafka.topics.transaction-completed}",
+            groupId = "${spring.kafka.consumer.group-id}"
+    )
+    public void consumeTransactionCompletedEvent(
+            ConsumerRecord<String, TransactionCompletedEvent> record
+    ) {
+        TransactionCompletedEvent event = record.value();
+
+        log.info(
+                "Received TransactionCompletedEvent. topic={}, partition={}, offset={}, key={}, eventId={}, reference={}",
+                record.topic(),
+                record.partition(),
+                record.offset(),
+                record.key(),
+                event.getEventId(),
+                event.getTransactionReference()
+        );
+
+        emailService.sendTransactionAlertEmail(
+                toBalanceAlert(event, TransactionDirection.DEBIT)
+        );
+
+        emailService.sendTransactionAlertEmail(
+                toBalanceAlert(event, TransactionDirection.CREDIT)
+        );
+
+        log.info(
+                "TransactionCompletedEvent processed successfully. eventId={}, reference={}",
+                event.getEventId(),
+                event.getTransactionReference()
+        );
+    }
+
+    private BalanceUpdateEvent toBalanceAlert(
+            TransactionCompletedEvent event,
+            TransactionDirection direction
+    ) {
+        boolean debit = TransactionDirection.DEBIT.equals(direction);
+
+        return BalanceUpdateEvent.builder()
+                .accountNumber(
+                        debit
+                                ? event.getFromAccountNumber()
+                                : event.getToAccountNumber()
+                )
+                .email(
+                        debit
+                                ? event.getFromEmail()
+                                : event.getToEmail()
+                )
+                .firstName(
+                        debit
+                                ? event.getFromFirstName()
+                                : event.getToFirstName()
+                )
+                .currentBalance(
+                        debit
+                                ? event.getFromCurrentBalance()
+                                : event.getToCurrentBalance()
+                )
+                .amount(event.getAmount())
+                .currency(Currency.valueOf(event.getCurrency()))
+                .transactionDirection(direction)
+                .transactionStatus(
+                        TransactionStatus.valueOf(event.getStatus())
+                )
+                .reference(event.getTransactionReference())
+                .description(event.getDescription())
+                .correlationId(event.getCorrelationId())
+                .build();
+    }
 }

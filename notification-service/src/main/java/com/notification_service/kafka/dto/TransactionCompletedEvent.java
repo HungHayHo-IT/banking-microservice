@@ -1,5 +1,6 @@
-package com.transaction_service.kafka.dto;
+package com.notification_service.kafka.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionCompletedEvent {
 
     private UUID eventId;
