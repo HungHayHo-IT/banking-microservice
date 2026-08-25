@@ -1,17 +1,22 @@
 package com.notification_service.kafka.service;
 
+import com.notification_service.entity.ProcessedEvent;
 import com.notification_service.enums.transaction.Currency;
 import com.notification_service.enums.transaction.TransactionDirection;
 import com.notification_service.enums.transaction.TransactionStatus;
 import com.notification_service.kafka.dto.BalanceUpdateEvent;
 import com.notification_service.kafka.dto.TransactionCompletedEvent;
 import com.notification_service.kafka.dto.UserRegisteredEvent;
+import com.notification_service.repository.ProcessedEventRepository;
 import com.notification_service.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -19,6 +24,10 @@ import org.springframework.stereotype.Service;
 public class NotificationConsumerListener {
 
     private final EmailService emailService;
+    private final ProcessedEventRepository processedEventRepository;
+
+    @Value("${spring.kafka.consumer.group-id}")
+    private String consumerGroup;
 
     @KafkaListener(
             topics = "${app.kafka.topics.user-registered}",
@@ -29,6 +38,20 @@ public class NotificationConsumerListener {
     ) {
         UserRegisteredEvent event = record.value();
 
+        if (processedEventRepository.existsByEventIdAndConsumerGroup(
+                event.getEventId(),
+                consumerGroup
+        )) {
+
+            log.warn(
+                    "Duplicate event detected. eventId={}, consumerGroup={}",
+                    event.getEventId(),
+                    consumerGroup
+            );
+
+            return;
+        }
+
         log.info(
                 "Received UserRegisteredEvent. topic={}, partition={}, offset={}, key={}, eventId={}, email={}",
                 record.topic(),
@@ -38,17 +61,22 @@ public class NotificationConsumerListener {
                 event.getEventId(),
                 event.getEmail()
         );
-
-        if (event.getEmail().contains("retry-test")) {
-            throw new RuntimeException("TEST RETRY DLT");
-        }
-
         emailService.sendWelcomeEmail(event);
+
+        processedEventRepository.save(
+                ProcessedEvent.builder()
+                        .eventId(event.getEventId())
+                        .consumerGroup(consumerGroup)
+                        .processedAt(LocalDateTime.now())
+                        .build()
+        );
 
         log.info(
                 "UserRegisteredEvent processed successfully. eventId={}",
                 event.getEventId()
         );
+
+
     }
 
     @KafkaListener(
@@ -70,12 +98,34 @@ public class NotificationConsumerListener {
                 event.getTransactionReference()
         );
 
+        if (processedEventRepository.existsByEventIdAndConsumerGroup(
+                event.getEventId(),
+                consumerGroup
+        )) {
+
+            log.warn(
+                    "Duplicate TransactionCompletedEvent. eventId={}, reference={}",
+                    event.getEventId(),
+                    event.getTransactionReference()
+            );
+
+            return;
+        }
+
         emailService.sendTransactionAlertEmail(
                 toBalanceAlert(event, TransactionDirection.DEBIT)
         );
 
         emailService.sendTransactionAlertEmail(
                 toBalanceAlert(event, TransactionDirection.CREDIT)
+        );
+
+        processedEventRepository.save(
+                ProcessedEvent.builder()
+                        .eventId(event.getEventId())
+                        .consumerGroup(consumerGroup)
+                        .processedAt(LocalDateTime.now())
+                        .build()
         );
 
         log.info(
