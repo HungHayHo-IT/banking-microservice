@@ -39,6 +39,10 @@ public class NotificationConsumerListener {
                 event.getEmail()
         );
 
+        if (event.getEmail().contains("retry-test")) {
+            throw new RuntimeException("TEST RETRY DLT");
+        }
+
         emailService.sendWelcomeEmail(event);
 
         log.info(

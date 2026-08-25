@@ -32,8 +32,13 @@ spring:
         spring.json.trusted.packages: com.notification_service.kafka.dto
         spring.json.type.mapping: com.user_account_service_service.kafka.dto.UserRegisteredEvent:com.notification_service.kafka.dto.UserRegisteredEvent,com.transaction_service.kafka.dto.TransactionCompletedEvent:com.notification_service.kafka.dto.TransactionCompletedEvent
 
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
     listener:
       ack-mode: record
+
   mail:
     host: smtp.gmail.com
     port: 587
