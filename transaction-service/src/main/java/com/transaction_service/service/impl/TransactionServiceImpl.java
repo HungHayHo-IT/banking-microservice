@@ -396,9 +396,16 @@ public class TransactionServiceImpl implements TransactionService {
         AccountBalanceSnapshot creditAccount = result.getCreditAccount();
 
         return TransactionCompletedEvent.builder()
-                .eventId(UUID.randomUUID())
-                .occurredAt(Instant.now())
 
+                // Event metadata
+                .eventId(UUID.randomUUID())
+                .eventType("banking.transaction.completed")
+                .eventVersion(1)
+                .occurredAt(Instant.now())
+                .correlationId(correlationId)
+                .aggregateId(transaction.getReference())
+
+                // Business data
                 .transactionReference(transaction.getReference())
                 .transactionType(transaction.getTransactionType().name())
 
@@ -416,7 +423,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .currency(transaction.getCurrency().name())
                 .status(transaction.getTransactionStatus().name())
                 .description(request.getDescription())
-                .correlationId(correlationId)
+
                 .build();
     }
 
@@ -427,7 +434,12 @@ public class TransactionServiceImpl implements TransactionService {
 
         return TransactionFailedEvent.builder()
                 .eventId(UUID.randomUUID())
+                .eventType("banking.transaction.failed")
+                .eventVersion(1)
                 .occurredAt(Instant.now())
+                .correlationId(correlationId)
+                .aggregateId(transaction.getReference())
+
                 .transactionReference(transaction.getReference())
                 .transactionType(transaction.getTransactionType().name())
                 .fromAccountNumber(transaction.getFromAccountNumber())
@@ -435,7 +447,6 @@ public class TransactionServiceImpl implements TransactionService {
                 .amount(transaction.getAmount())
                 .currency(transaction.getCurrency().name())
                 .status(TransactionStatus.FAILED.name())
-                .correlationId(correlationId)
                 .failureReason(exception.getClass().getSimpleName())
                 .build();
     }

@@ -19,6 +19,9 @@ public class TransactionFailedEvent {
 
     private UUID eventId;
     private Instant occurredAt;
+    private String eventType;
+    private int eventVersion;
+    private String aggregateId;
 
     private String transactionReference;
     private String transactionType;

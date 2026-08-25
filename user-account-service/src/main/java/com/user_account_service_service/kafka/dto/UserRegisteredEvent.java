@@ -16,9 +16,15 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UserRegisteredEvent {
 
+    // Event metadata
     private UUID eventId;
+    private String eventType;
+    private int eventVersion;
     private Instant occurredAt;
+    private String correlationId;
+    private String aggregateId;
 
+    // Business data
     private Long userId;
     private String email;
     private String firstName;

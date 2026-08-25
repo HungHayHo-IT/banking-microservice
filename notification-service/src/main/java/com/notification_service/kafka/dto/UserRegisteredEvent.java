@@ -19,7 +19,11 @@ import java.util.UUID;
 public class UserRegisteredEvent {
 
     private UUID eventId;
+    private String eventType;
+    private int eventVersion;
     private Instant occurredAt;
+    private String correlationId;
+    private String aggregateId;
 
     private Long userId;
     private String email;

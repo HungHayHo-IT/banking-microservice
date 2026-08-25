@@ -88,12 +88,17 @@ public class AuthServiceImpl implements AuthService {
 
         UserRegisteredEvent event = UserRegisteredEvent.builder()
                 .eventId(UUID.randomUUID())
+                .eventType("banking.user.registered")
+                .eventVersion(1)
                 .occurredAt(Instant.now())
+                .correlationId(UUID.randomUUID().toString())
+                .aggregateId(savedUser.getId().toString())
+
                 .userId(savedUser.getId())
                 .email(savedUser.getEmail())
                 .firstName(savedUser.getFirstName())
                 .lastName(savedUser.getLastName())
-                .accountNumber(accountNumber)
+                .accountNumber(accountToSaveToDb.getAccountNumber())
                 .bankName("BANK NOW")
                 .build();
 

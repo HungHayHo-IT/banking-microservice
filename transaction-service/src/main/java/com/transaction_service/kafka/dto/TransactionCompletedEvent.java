@@ -18,7 +18,11 @@ import java.util.UUID;
 public class TransactionCompletedEvent {
 
     private UUID eventId;
+    private String eventType;
+    private int eventVersion;
     private Instant occurredAt;
+    private String correlationId;
+    private String aggregateId;
 
     private String transactionReference;
     private String transactionType;
@@ -37,5 +41,5 @@ public class TransactionCompletedEvent {
     private String currency;
     private String status;
     private String description;
-    private String correlationId;
+
 }
