@@ -58,7 +58,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .channel(Channel.API)
                 .description(request.getDescription())
                 .transactionType(TransactionType.DEPOSIT)
-                .transactionStatus(TransactionStatus.SUCCESS)
+                .transactionStatus(TransactionStatus.COMPLETED)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -70,7 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .currency(Currency.VND)
                 .description(request.getDescription())
                 .transactionDirection(TransactionDirection.CREDIT)
-                .transactionStatus(TransactionStatus.SUCCESS)
+                .transactionStatus(TransactionStatus.COMPLETED)
                 .reference(savedTransaction.getReference())
                 .build();
         transactionEventPublisher.publishBalanceUpdateRequested(balanceUpdateEvent);
@@ -134,7 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             saved.setTransactionStatus(
-                    TransactionStatus.SUCCESS
+                    TransactionStatus.COMPLETED
             );
 
             Transaction completed =
@@ -229,7 +229,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .channel(Channel.API)
                 .description(request.getDescription())
                 .transactionType(TransactionType.WITHDRAWAL)
-                .transactionStatus(TransactionStatus.SUCCESS)
+                .transactionStatus(TransactionStatus.COMPLETED)
                 .transactionDirection(TransactionDirection.DEBIT)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -242,7 +242,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .currency(Currency.VND)
                 .description(request.getDescription())
                 .transactionDirection(TransactionDirection.DEBIT)
-                .transactionStatus(TransactionStatus.SUCCESS)
+                .transactionStatus(TransactionStatus.COMPLETED)
                 .reference(savedWithdrawalTnx.getReference())
                 .build());
 
