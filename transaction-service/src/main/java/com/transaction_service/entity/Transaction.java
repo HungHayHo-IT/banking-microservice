@@ -1,6 +1,7 @@
 package com.transaction_service.entity;
 
 import com.transaction_service.enums.*;
+import com.transaction_service.saga.SagaStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -54,5 +55,9 @@ public class Transaction {
     private Channel channel;
 
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "saga_status")
+    private SagaStatus sagaStatus;
 
 }

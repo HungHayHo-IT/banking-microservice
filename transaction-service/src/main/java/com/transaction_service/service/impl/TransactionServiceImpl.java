@@ -10,9 +10,11 @@ import com.transaction_service.feign.AccountFeignClient;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
 import com.transaction_service.kafka.dto.TransactionCompletedEvent;
 import com.transaction_service.kafka.dto.TransactionFailedEvent;
+import com.transaction_service.kafka.dto.saga.DebitRequestedEvent;
 import com.transaction_service.kafka.outbox.OutboxEventService;
 import com.transaction_service.kafka.service.TransactionEventPublisher;
 import com.transaction_service.repository.TransactionRepository;
+import com.transaction_service.saga.SagaStatus;
 import com.transaction_service.service.TransactionService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -102,105 +104,41 @@ public class TransactionServiceImpl implements TransactionService {
                 .description(request.getDescription())
                 .transactionType(TransactionType.TRANSFER)
                 .transactionStatus(TransactionStatus.PENDING)
+                .sagaStatus(SagaStatus.STARTED)
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        Transaction saved =
-                transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
 
-        try {
-            InternalTransferRequest internalRequest =
-                    InternalTransferRequest.builder()
-                            .reference(reference)
-                            .fromAccountNumber(
-                                    request.getFromAccountNumber()
-                            )
-                            .toAccountNumber(
-                                    request.getToAccountNumber()
-                            )
-                            .amount(request.getAmount())
-                            .build();
+        DebitRequestedEvent event =
+                DebitRequestedEvent.builder()
+                        .eventId(UUID.randomUUID().toString())
+                        .reference(saved.getReference())
+                        .fromAccountNumber(
+                                saved.getFromAccountNumber()
+                        )
+                        .toAccountNumber(
+                                saved.getToAccountNumber()
+                        )
+                        .amount(saved.getAmount())
+                        .currency(saved.getCurrency())
+                        .correlationId(correlationId)
+                        .build();
 
-            ApiResponse<InternalTransferResponse> response =
-                    accountFeignClient.transfer(
-                            internalRequest,
-                            correlationId
-                    );
+        outboxEventService.saveEvent(
+                saved.getReference(),
+                "banking.transaction.debit.requested",
+                event
+        );
 
-            if (response == null || response.data() == null) {
-                throw new ServiceUnavailableException(
-                        "User Account Service returned no data"
-                );
-            }
-
-            saved.setTransactionStatus(
-                    TransactionStatus.SUCCESS
-            );
-
-            Transaction completed =
-                    transactionRepository.save(saved);
-
-            TransactionCompletedEvent event =
-                    toTransactionCompletedEvent(
-                            completed,
-                            response.data(),
-                            request,
-                            correlationId
-                    );
-
-            outboxEventService.saveEvent(
-                    completed.getReference(),
-                    "banking.transaction.completed",
-                    event
-            );
-
-            return new ApiResponse<>(
-                    200,
-                    "Transfer Successful",
-                    modelMapper.map(
-                            completed,
-                            TransactionDTO.class
-                    )
-            );
-
-        } catch (FeignException exception) {
-            markFailed(saved, correlationId, exception);
-
-            if (exception.status() == 400) {
-                throw new BadRequestException(
-                        "Transfer was rejected by User Account Service"
-                );
-            }
-
-            if (exception.status() == 403) {
-                throw new ForbiddenException(
-                        "You are not allowed to transfer from this account"
-                );
-            }
-
-            if (exception.status() == 404) {
-                throw new NotFoundException(
-                        "Source or destination account was not found"
-                );
-            }
-
-            throw new ServiceUnavailableException(
-                    "User Account Service is unavailable"
-            );
-
-        } catch (RuntimeException exception) {
-            markFailed(saved, correlationId, exception);
-            transactionEventPublisher.publishTransactionFailed(
-                    toTransactionFailedEvent(
-                            saved,
-                            correlationId,
-                            exception
-                    )
-            );
-            throw new ServiceUnavailableException(
-                    "Transfer could not be completed"
-            );
-        }
+        return new ApiResponse<>(
+                202,
+                "Transfer request accepted",
+                modelMapper.map(
+                        saved,
+                        TransactionDTO.class
+                )
+        );
     }
 
     @Override
