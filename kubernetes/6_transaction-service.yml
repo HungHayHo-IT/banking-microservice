@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: transaction-service
-          image: hunghayho/bankapp-microservice-transaction-service:latest
+          image: hunghayho/banking-transaction-service:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8082

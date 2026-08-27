@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: discovery-service
-          image: hunghayho/bankapp-microservice-discovery-service
+          image: hunghayho/banking-discovery-service
           ports:
             - containerPort: 8761
           env:

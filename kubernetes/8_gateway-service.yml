@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: gateway-service
-          image: hunghayho/bankapp-microservice-gateway-service
+          image: hunghayho/banking-gateway-service
           ports:
             - containerPort: 8080
           env:

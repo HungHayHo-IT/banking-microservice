@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-account-service
-          image: hunghayho/bankapp-microservice-user-account-service
+          image: hunghayho/banking-user-account-service
           ports:
             - containerPort: 8081
           env:

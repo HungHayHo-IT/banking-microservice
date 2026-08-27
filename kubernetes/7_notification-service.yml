@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: hunghayho/bankapp-microservice-notification-service
+          image: hunghayho/banking-notification-service
           ports:
             - containerPort: 8083
           env:
