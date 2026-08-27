@@ -10,6 +10,7 @@ import com.transaction_service.feign.AccountFeignClient;
 import com.transaction_service.kafka.dto.BalanceUpdateEvent;
 import com.transaction_service.kafka.dto.TransactionCompletedEvent;
 import com.transaction_service.kafka.dto.TransactionFailedEvent;
+import com.transaction_service.kafka.outbox.OutboxEventService;
 import com.transaction_service.kafka.service.TransactionEventPublisher;
 import com.transaction_service.repository.TransactionRepository;
 import com.transaction_service.service.TransactionService;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import feign.FeignException;
 import com.transaction_service.exception.ServiceUnavailableException;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.Instant;
@@ -38,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final AccountFeignClient accountFeignClient;
     private final ModelMapper modelMapper;
     private final TransactionEventPublisher transactionEventPublisher;
+    private final OutboxEventService outboxEventService;
 
     @Override
     public ApiResponse<TransactionDTO> deposit(DepositRequest request, String correlationid) {
@@ -79,6 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     }
 
+    @Transactional
     @Override
     public ApiResponse<TransactionDTO> transfer(
             TransferRequest request,
@@ -136,13 +140,18 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction completed =
                     transactionRepository.save(saved);
 
-            transactionEventPublisher.publishTransactionCompleted(
+            TransactionCompletedEvent event =
                     toTransactionCompletedEvent(
                             completed,
                             response.data(),
                             request,
                             correlationId
-                    )
+                    );
+
+            outboxEventService.saveEvent(
+                    completed.getReference(),
+                    "banking.transaction.completed",
+                    event
             );
 
             return new ApiResponse<>(
