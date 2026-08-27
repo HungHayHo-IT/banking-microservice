@@ -15,4 +15,16 @@ public class KafkaTopicProperties {
     private String balanceUpdateNotification;
     private String transactionCompleted;
     private String transactionFailed;
+
+    // Saga topics
+    private String transferDebitRequested;
+    private String transferDebitReserved;
+    private String transferDebitFailed;
+
+    private String transferCreditRequested;
+    private String transferCreditCompleted;
+    private String transferCreditFailed;
+
+    private String transferRefundRequested;
+    private String transferCompensated;
 }
