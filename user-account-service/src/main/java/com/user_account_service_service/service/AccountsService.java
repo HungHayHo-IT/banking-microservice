@@ -5,6 +5,7 @@ import com.user_account_service_service.dto.ApiResponse;
 import com.user_account_service_service.dto.InternalTransferRequest;
 import com.user_account_service_service.dto.InternalTransferResponse;
 import com.user_account_service_service.enums.AccountStatus;
+import com.user_account_service_service.kafka.dto.TransferSagaEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,5 +22,7 @@ public interface AccountsService {
             InternalTransferRequest request,
             String correlationId
     );
+
+    void handleTransferDebit(TransferSagaEvent event);
 
 }

@@ -3,11 +3,14 @@ package com.user_account_service_service.service.impl;
 import com.user_account_service_service.config.ModelMapperConfig;
 import com.user_account_service_service.dto.*;
 import com.user_account_service_service.entity.Account;
+import com.user_account_service_service.entity.ProcessedEvent;
 import com.user_account_service_service.entity.User;
 import com.user_account_service_service.enums.AccountStatus;
 import com.user_account_service_service.exceptions.BadRequestException;
 import com.user_account_service_service.exceptions.NotFoundException;
+import com.user_account_service_service.kafka.dto.TransferSagaEvent;
 import com.user_account_service_service.repository.AccountRepository;
+import com.user_account_service_service.repository.ProcessedEventRepository;
 import com.user_account_service_service.repository.UserRepository;
 import com.user_account_service_service.service.AccountsService;
 import jakarta.ws.rs.ForbiddenException;
@@ -24,8 +27,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class AccountsServiceImpl implements AccountsService {
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final ProcessedEventRepository processedEventRepository;
 
     @Override
     public ApiResponse<AccountDTO> getMyAccount() {
@@ -237,6 +243,121 @@ public class AccountsServiceImpl implements AccountsService {
         );
     }
 
+    @Override
+    @Transactional
+    public void handleTransferDebit(TransferSagaEvent event) {
+
+        // 1. Validate dữ liệu event
+        if (event == null) {
+            throw new BadRequestException("Transfer event must not be null");
+        }
+
+        if (event.getEventId() == null) {
+            throw new BadRequestException("Event ID must not be null");
+        }
+
+        if (event.getFromAccountNumber() == null
+                || event.getFromAccountNumber().isBlank()) {
+            throw new BadRequestException(
+                    "Source account number must not be blank"
+            );
+        }
+
+        if (event.getAmount() == null
+                || event.getAmount().signum() <= 0) {
+            throw new BadRequestException(
+                    "Transfer amount must be greater than zero"
+            );
+        }
+
+        // 2. Idempotency
+        if (processedEventRepository.existsByEventId(event.getEventId())) {
+
+            log.info(
+                    "Duplicate TRANSFER_DEBIT_REQUESTED ignored. " +
+                            "eventId={}, reference={}",
+                    event.getEventId(),
+                    event.getTransactionReference()
+            );
+
+            return;
+        }
+
+        // 3. Tìm tài khoản nguồn
+        Account account = accountRepository
+                .findByAccountNumber(event.getFromAccountNumber())
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Source account not found: "
+                                        + event.getFromAccountNumber()
+                        )
+                );
+
+        // 4. Account phải ACTIVE
+        if (account.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new BadRequestException(
+                    "Source account must be ACTIVE"
+            );
+        }
+
+        // 5. Kiểm tra số dư
+        if (account.getBalance()
+                .compareTo(event.getAmount()) < 0) {
+
+            throw new BadRequestException(
+                    "Insufficient account balance"
+            );
+        }
+
+        // 6. Debit
+        account.setBalance(
+                account.getBalance()
+                        .subtract(event.getAmount())
+        );
+
+        accountRepository.save(account);
+
+        // 7. Đánh dấu event đã xử lý
+        ProcessedEvent processedEvent = ProcessedEvent.builder()
+                .eventId(event.getEventId())
+                .eventType(event.getEventType())
+                .processedAt(Instant.now())
+                .build();
+
+        processedEventRepository.save(processedEvent);
+
+        // 8. Tạo event DEBIT_RESERVED
+        TransferSagaEvent responseEvent =
+                TransferSagaEvent.builder()
+                        .eventId(UUID.randomUUID())
+                        .eventType("TRANSFER_DEBIT_RESERVED")
+                        .eventVersion(1)
+                        .occurredAt(Instant.now())
+                        .correlationId(event.getCorrelationId())
+                        .transactionReference(
+                                event.getTransactionReference()
+                        )
+                        .fromAccountNumber(
+                                event.getFromAccountNumber()
+                        )
+                        .toAccountNumber(
+                                event.getToAccountNumber()
+                        )
+                        .amount(event.getAmount())
+                        .currency(event.getCurrency())
+                        .build();
+
+        log.info(
+                "Transfer debit successful. " +
+                        "reference={}, account={}, amount={}, newBalance={}",
+                event.getTransactionReference(),
+                account.getAccountNumber(),
+                event.getAmount(),
+                account.getBalance()
+        );
+
+
+    }
     private AccountBalanceSnapshot toSnapshot(Account account) {
         return AccountBalanceSnapshot.builder()
                 .accountNumber(account.getAccountNumber())

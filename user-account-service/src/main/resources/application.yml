@@ -90,3 +90,14 @@ app:
     topics:
       user-registered: banking.user.registered.v1
       balance-update-notification: balance-update-notification-events
+
+      transfer-debit-requested: transfer.debit.requested.v1
+      transfer-debit-reserved: transfer.debit.reserved.v1
+      transfer-debit-failed: transfer.debit.failed.v1
+
+      transfer-credit-requested: transfer.credit.requested.v1
+      transfer-credit-completed: transfer.credit.completed.v1
+      transfer-credit-failed: transfer.credit.failed.v1
+
+      transfer-refund-requested: transfer.refund.requested.v1
+      transfer-compensated: transfer.compensated.v1
