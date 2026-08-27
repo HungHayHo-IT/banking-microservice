@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -45,10 +46,14 @@ class TransactionEventPublisherIntegrationTest {
     static final String TOPIC = "balance-update-events";
 
     private final EmbeddedKafkaBroker embeddedKafka;
+    private final TransactionEventPublisher publisher;
     private Consumer<String, String> consumer;
 
-    TransactionEventPublisherIntegrationTest(EmbeddedKafkaBroker embeddedKafka) {
+    TransactionEventPublisherIntegrationTest(
+            EmbeddedKafkaBroker embeddedKafka,
+            TransactionEventPublisher publisher) {
         this.embeddedKafka = embeddedKafka;
+        this.publisher = publisher;
     }
 
     @BeforeEach
@@ -61,7 +66,7 @@ class TransactionEventPublisherIntegrationTest {
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
-        var consumerFactory = new org.springframework.kafka.core.DefaultKafkaConsumerFactory<String, String>(consumerProps);
+        var consumerFactory = new DefaultKafkaConsumerFactory<String, String>(consumerProps);
         consumer = consumerFactory.createConsumer();
         embeddedKafka.consumeFromAnEmbeddedTopic(consumer, TOPIC);
     }
@@ -89,7 +94,7 @@ class TransactionEventPublisherIntegrationTest {
                 .correlationId("CORR-001")
                 .build();
 
-        producer().publishBalanceUpdateRequested(event).join();
+        publisher.publishBalanceUpdateRequested(event).join();
 
         ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(
                 consumer,
@@ -107,12 +112,6 @@ class TransactionEventPublisherIntegrationTest {
                 .contains("\"reference\":\"TX-001\"")
                 .contains("\"currency\":\"VND\"");
     }
-
-    private TransactionEventPublisher producer() {
-        return testConfigPublisher;
-    }
-
-    private final TransactionEventPublisher testConfigPublisher = null;
 
     @TestConfiguration
     static class KafkaPublisherTestConfig {
